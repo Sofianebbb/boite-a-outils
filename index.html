@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boîte à outils — 1'30 pour comprendre</title>
+  <meta name="description" content="Outils gratuits de la série 1'30 pour comprendre — vulgarisation philo-psycho-sociologique par Mal Aimé" />
+  <meta property="og:title" content="Boîte à outils — 1'30 pour comprendre" />
+  <meta property="og:description" content="Un outil par épisode. Gratuit. Pour tout le monde." />
+  <meta property="og:type" content="website" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; -webkit-font-smoothing: antialiased; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+  <script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const PROMPT_TEXT = `Tu es un assistant d'esprit critique. L'utilisateur va te donner une information, un titre d'article, une déclaration entendue à la télé, ou un post vu sur les réseaux.
+
+Ton rôle est de l'aider à appliquer les 4 questions du vaccin cognitif — sans moraliser, sans condescendance, avec un ton direct et accessible.
+
+Pour chaque information fournie, réponds en suivant cette structure :
+
+1. L'ÉTIQUETTE — QUI TE LE DIT ?
+— Identifie la source (média, personne, institution)
+— Signale si c'est un éditorialiste, un expert, un journaliste d'investigation, ou un chroniqueur d'opinion
+— Note les éventuels conflits d'intérêt ou liens avec un groupe médiatique
+
+2. LE GAVAGE — COMBIEN DE FOIS ?
+— Indique si cette information circule en boucle (effet de vérité illusoire)
+— Signale si c'est un sujet sur-représenté par rapport à sa fréquence réelle
+— Donne si possible un chiffre de contexte (ex : statistiques réelles vs perception)
+
+3. LE NUTRI-SCORE — QUI DIT LE CONTRAIRE ?
+— Propose au moins une source contradictoire crédible
+— Signale si le sujet fait l'objet d'un vrai débat ou d'un faux consensus
+— Indique si des experts du domaine ont une position différente
+
+4. LE SCORBUT — T'AS VÉRIFIÉ QUOI ?
+— Fournis les données vérifiables disponibles (chiffres officiels, études, rapports)
+— Donne les liens ou noms de sources à consulter
+— Signale ce qui est factuel vs ce qui est opinion
+
+Termine toujours par une phrase du type : "Maintenant t'as les éléments. La conclusion, c'est toi qui la fais."
+
+Règles :
+— Jamais de morale. Jamais de "il faut penser ceci".
+— Ton direct, vulgarisation, comme si tu parlais à quelqu'un d'intelligent qui n'a juste pas eu le temps de vérifier.
+— Si l'info est vraie et vérifiable, dis-le clairement. Le but n'est pas de tout remettre en cause — c'est de savoir distinguer.`;
+
+const questions = [
+  { id: 1, short: "L'étiquette", detail: "Qui te le dit ? Vérifie la source. Pas le logo de la chaîne — la personne. Qui parle ? Quelle expertise ? Quel intérêt ? Un éditorialiste n'est pas un journaliste d'investigation. Un plateau de cinq personnes d'accord entre elles n'est pas un débat.", action: "Tape le nom de la personne + son parcours. 30 secondes.", icon: "🏷" },
+  { id: 2, short: "Combien de fois ?", detail: "Si tu l'as entendu dix fois cette semaine — c'est pas une preuve que c'est vrai. C'est une preuve que c'est répété. L'effet de vérité illusoire (Hasher, 1977) montre que ton cerveau confond familiarité et vérité.", action: "Si une info revient en boucle — c'est un signal d'alerte, pas une confirmation.", icon: "🔄" },
+  { id: 3, short: "Qui dit le contraire ?", detail: "Si personne ne contredit sur le plateau — c'est pas un consensus. C'est une sélection. Le vrai pluralisme, c'est quand quelqu'un dans la salle n'est pas d'accord et qu'on le laisse finir sa phrase.", action: "Cherche un média qui dit l'inverse. Lis les deux. Ton cerveau fera le reste.", icon: "⚖" },
+  { id: 4, short: "T'as vérifié quoi ?", detail: "La plupart des affirmations qu'on te sert à la télé sont vérifiables en moins d'une minute. Les homicides en France ont été divisés par deux en 30 ans. Personne ne te le dit — mais c'est là.", action: "Un chiffre sans source, c'est une opinion. Un chiffre avec source, c'est un fait.", icon: "🔍" },
+];
+
+const ep1References = [
+  { title: "The Nature of Prejudice", author: "Gordon Allport", year: "1954", type: "Livre fondateur", desc: "L'ouvrage qui a formalisé la théorie du contact intergroupe.", emoji: "📘" },
+  { title: "Méta-analyse — 515 études", author: "Pettigrew & Tropp", year: "2006", type: "Étude scientifique", desc: "La plus grande méta-analyse confirmant que le contact réduit les préjugés.", emoji: "📊" },
+  { title: "Au boulot !", author: "François Ruffin", year: "2024", type: "Documentaire", desc: "Sarah Saldmann vit au SMIC. Elle fond en larmes devant une aide-soignante.", emoji: "🎬", available: "En VOD" },
+  { title: "White Right: Meeting the Enemy", author: "Deeyah Khan", year: "2017", type: "Documentaire", desc: "Réalisatrice musulmane immergée un an avec des dirigeants néonazis. Trois hauts responsables quittent le mouvement.", emoji: "🎬", available: "Netflix" },
+  { title: "The Good Place", author: "Michael Schur", year: "2016-2020", type: "Série TV", desc: "Michael, le démon qui torture les humains depuis des siècles, finit par changer de camp. Pas parce qu'on l'a convaincu. Parce qu'il les a côtoyés.", emoji: "📺", available: "Netflix" },
+];
+
+const ep2Sources = [
+  { label: "Aisance cognitive", detail: "Daniel Kahneman — Thinking, Fast and Slow, 2011" },
+  { label: "Biais de disponibilité", detail: "Tversky & Kahneman — Cognitive Psychology, 1973" },
+  { label: "Effet de vérité illusoire", detail: "Hasher, Goldstein & Toppino, 1977" },
+  { label: "Homicides France ÷ 2", detail: "Ministère de l'Intérieur, 1993-2022" },
+  { label: "CNews — 24 sanctions", detail: "Arcom / Mediapart, janvier 2026 — 630 000€ d'amendes" },
+  { label: "Laurence Ferrari", detail: "Hapsatou Sy — Télérama, 19 février 2024" },
+  { label: "Rachel Khan", detail: "Virée de Radio Classique pour plagiat, 2023 — auditionnée pour incitation à la haine, janvier 2026" },
+  { label: "Sonia Mabrouk", detail: "Démission de CNews, 6 février 2026 — affaire Morandini, rejoint BFMTV rentrée 2026" },
+  { label: "Frontières", detail: "Fondation Jean-Jaurès, mars 2025 — média identitaire ex-Livre Noir" },
+  { label: "Fenêtre d'Overton", detail: "Joseph Overton, Mackinac Center, années 1990" },
+  { label: "Théorie de l'inoculation", detail: "Roozenbeek & van der Linden — Science Advances, 2022 — 30 000 participants, 7 expériences" },
+  { label: "Rosalía — LUX", detail: "14 langues, Metacritic 95/100, novembre 2025" },
+  { label: "Aimé Césaire", detail: "Discours sur le colonialisme, 1950" },
+];
+
+function getTheme(mode, highContrast) {
+  if (mode === "dark") {
+    return {
+      bg: highContrast ? "#000000" : "#111a13",
+      bgCard: highContrast ? "#111111" : "#1a2b1e",
+      bgPale: highContrast ? "#1a1a1a" : "#1e3322",
+      bgMint: highContrast ? "#0d0d0d" : "#162818",
+      green: highContrast ? "#00ff44" : "#5cb85c",
+      greenDark: highContrast ? "#00cc36" : "#4a9e42",
+      greenDeep: highContrast ? "#00aa2e" : "#3a8a34",
+      greenPale: highContrast ? "#1a2a1a" : "#1e3322",
+      white: highContrast ? "#ffffff" : "#e8f0ea",
+      textDark: highContrast ? "#ffffff" : "#d4e8d8",
+      textMed: highContrast ? "#dddddd" : "#a8c8ae",
+      textLight: highContrast ? "#bbbbbb" : "#7a9e80",
+      border: highContrast ? "#444444" : "#2a4430",
+      headerBg: highContrast ? "#003300" : "#2a4a30",
+    };
+  }
+  if (highContrast) {
+    return {
+      bg: "#ffffff", bgCard: "#ffffff", bgPale: "#e0f0e2", bgMint: "#d0ecd3",
+      green: "#006600", greenDark: "#004d00", greenDeep: "#003300", greenPale: "#cceecc",
+      white: "#ffffff", textDark: "#000000", textMed: "#1a1a1a", textLight: "#333333",
+      border: "#006600", headerBg: "#006600",
+    };
+  }
+  return {
+    bg: "#f8fcf7", bgCard: "#ffffff", bgPale: "#eaf7e8", bgMint: "#f0faf3",
+    green: "#5cb85c", greenDark: "#4a9e42", greenDeep: "#3a8a34", greenPale: "#eaf7e8",
+    white: "#ffffff", textDark: "#1a2e1a", textMed: "#3d6637", textLight: "#6a9962",
+    border: "#c8e6c3", headerBg: "#5cb85c",
+  };
+}
+
+function Toolbox() {
+  const [openEp, setOpenEp] = useState(2);
+  const [activeQ, setActiveQ] = useState(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [entered, setEntered] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const [mode, setMode] = useState("light");
+  const [highContrast, setHighContrast] = useState(false);
+  const [largeText, setLargeText] = useState(false);
+  const [showA11y, setShowA11y] = useState(false);
+
+  const t = getTheme(mode, highContrast);
+  const fs = largeText ? 1.25 : 1;
+
+  useEffect(() => { setTimeout(() => setEntered(true), 150); }, []);
+
+  const copyPrompt = async () => {
+    try { await navigator.clipboard.writeText(PROMPT_TEXT); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); }
+  };
+
+  const toggleMode = () => setMode(m => m === "light" ? "dark" : "light");
+
+  const epContentRef1 = useRef(null);
+  const epContentRef2 = useRef(null);
+  const [epH1, setEpH1] = useState(0);
+  const [epH2, setEpH2] = useState(0);
+
+  const updateHeights = useCallback(() => {
+    requestAnimationFrame(() => {
+      if (epContentRef1.current) setEpH1(openEp === 1 ? epContentRef1.current.scrollHeight : 0);
+      if (epContentRef2.current) setEpH2(openEp === 2 ? epContentRef2.current.scrollHeight : 0);
+    });
+  }, [openEp]);
+
+  useEffect(() => { updateHeights(); }, [openEp, showPrompt, activeQ, showSources, updateHeights]);
+
+  return (
+    <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'Nunito', sans-serif", color: t.textDark, transition: "all 0.3s ease" }}>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .q-card { cursor: pointer; transition: all 0.3s ease; }
+        .q-card:hover { transform: translateY(-2px); }
+        .btn { cursor: pointer; transition: all 0.25s ease; border: none; font-family: inherit; }
+        .btn:hover { transform: translateY(-1px); }
+        .ref-card { transition: all 0.2s ease; }
+        .a11y-toggle { cursor: pointer; transition: all 0.2s ease; border: none; font-family: inherit; }
+        .a11y-toggle:hover { opacity: 0.8; }
+        .ep-btn { cursor: pointer; border: none; font-family: inherit; width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: transparent; text-align: left; }
+        @media (max-width: 600px) { .q-grid { grid-template-columns: 1fr !important; } }
+      `}</style>
+
+      <button className="a11y-toggle" onClick={() => setShowA11y(!showA11y)} aria-label="Accessibilité" style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100, width: 48, height: 48, borderRadius: "50%", background: t.green, color: t.white, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 16px ${t.green}40` }}>♿</button>
+
+      {showA11y && (
+        <div style={{ position: "fixed", bottom: 80, right: 20, zIndex: 100, background: t.bgCard, border: `2px solid ${t.border}`, borderRadius: 16, padding: 20, width: 240, boxShadow: "0 8px 32px rgba(0,0,0,0.15)", animation: "fadeIn 0.25s ease both" }}>
+          <p style={{ fontSize: 13 * fs, fontWeight: 800, color: t.textDark, marginBottom: 14 }}>Accessibilité</p>
+          <button className="a11y-toggle" onClick={toggleMode} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: mode === "dark" ? t.greenPale : t.bgPale, marginBottom: 8, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
+            <span style={{ fontSize: 16 }}>{mode === "dark" ? "☀️" : "🌙"}</span>{mode === "dark" ? "Mode clair" : "Mode sombre"}
+          </button>
+          <button className="a11y-toggle" onClick={() => setHighContrast(!highContrast)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: highContrast ? t.greenPale : t.bgPale, marginBottom: 8, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
+            <span style={{ fontSize: 16 }}>◐</span>Contraste {highContrast ? "✓" : "élevé"}
+          </button>
+          <button className="a11y-toggle" onClick={() => setLargeText(!largeText)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: largeText ? t.greenPale : t.bgPale, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
+            <span style={{ fontSize: 16 }}>🔤</span>Grands caractères {largeText ? "✓" : ""}
+          </button>
+        </div>
+      )}
+
+      <div style={{ background: t.headerBg, padding: "40px 20px 48px", textAlign: "center", transition: "background 0.3s ease" }}>
+        <div style={{ maxWidth: 600, margin: "0 auto", opacity: entered ? 1 : 0, transform: entered ? "translateY(0)" : "translateY(10px)", transition: "all 0.6s ease" }}>
+          <div style={{ display: "inline-block", padding: "5px 16px", borderRadius: 100, background: `${t.white}20`, fontSize: 11 * fs, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: t.white, marginBottom: 18 }}>1'30 pour comprendre</div>
+          <h1 style={{ fontSize: `clamp(${32 * fs}px, 8vw, ${48 * fs}px)`, fontWeight: 900, color: t.white, lineHeight: 1.05, marginBottom: 10 }}>Boîte à outils.</h1>
+          <p style={{ fontSize: 15 * fs, fontWeight: 600, color: `${t.white}cc`, lineHeight: 1.6 }}>Un outil par épisode. Gratuit. Pour tout le monde.</p>
+        </div>
+      </div>
+
+      <div style={{ height: 24, background: t.headerBg, position: "relative", transition: "background 0.3s ease" }}>
+        <div style={{ position: "absolute", inset: 0, background: t.bg, borderRadius: "24px 24px 0 0", transition: "background 0.3s ease" }} />
+      </div>
+
+      <div style={{ maxWidth: 600, margin: "0 auto", padding: "8px 20px 60px" }}>
+
+        {/* EPISODE 1 */}
+        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${openEp === 1 ? t.green : t.border}`, overflow: "hidden", transition: "all 0.3s ease", boxShadow: openEp === 1 ? `0 4px 24px ${t.green}15` : "none", marginBottom: 12 }}>
+          <button className="ep-btn" onClick={() => setOpenEp(openEp === 1 ? null : 1)}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: openEp === 1 ? t.green : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 1 ? t.white : t.green, transition: "all 0.3s ease", flexShrink: 0 }}>1</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>La théorie du contact</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: t.green, transform: openEp === 1 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>▾</div>
+          </button>
+          <div style={{ height: epH1, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+            <div ref={epContentRef1} style={{ padding: "0 22px 22px" }}>
+              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
+                <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.75, marginBottom: 20 }}>Le contact avec un seul individu réduit l'intolérance envers le groupe entier. Ça fonctionne. Scientifiquement. Alors pourquoi on construit des algorithmes pour l'éviter ?</p>
+                <div style={{ background: t.bgPale, borderRadius: 12, padding: 18, marginBottom: 20 }}>
+                  <p style={{ fontSize: 13 * fs, fontWeight: 700, color: t.greenDark, marginBottom: 8 }}>Ce que tu peux faire</p>
+                  <p style={{ fontSize: 13 * fs, color: t.textMed, lineHeight: 1.7 }}>Va à la rencontre de quelqu'un que tu ne connais pas. Pas en ligne — en vrai. Un voisin. Un collègue d'un autre service. Un seul contact suffit. C'est prouvé sur 515 études.</p>
+                </div>
+                <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>Références citées dans l'épisode</p>
+                {ep1References.map((ref, i) => (
+                  <div key={i} className="ref-card" style={{ display: "flex", gap: 14, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, marginBottom: 8, alignItems: "flex-start" }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{ref.emoji}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13 * fs, fontWeight: 700, color: t.textDark, marginBottom: 2 }}>{ref.title}</div>
+                      <div style={{ fontSize: 11 * fs, color: t.textLight, marginBottom: 4 }}>{ref.author} — {ref.year} · {ref.type}</div>
+                      <div style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6 }}>{ref.desc}</div>
+                      {ref.available && (<div style={{ display: "inline-block", marginTop: 6, padding: "3px 10px", borderRadius: 100, background: t.bgPale, fontSize: 10 * fs, fontWeight: 700, color: t.greenDark }}>Disponible sur {ref.available}</div>)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* EPISODE 2 */}
+        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${openEp === 2 ? t.green : t.border}`, overflow: "hidden", transition: "all 0.3s ease", boxShadow: openEp === 2 ? `0 4px 24px ${t.green}15` : "none", marginBottom: 12 }}>
+          <button className="ep-btn" onClick={() => setOpenEp(openEp === 2 ? null : 2)}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: openEp === 2 ? t.green : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 2 ? t.white : t.green, transition: "all 0.3s ease", flexShrink: 0 }}>2</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>Nos peurs</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: t.green, transform: openEp === 2 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>▾</div>
+          </button>
+          <div style={{ height: epH2, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+            <div ref={epContentRef2} style={{ padding: "0 22px 22px" }}>
+              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
+                <div style={{ textAlign: "center", marginBottom: 20 }}>
+                  <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.6 }}>À chaque poison, son antidote. Voici le tien.</p>
+                </div>
+
+                <div style={{ background: t.bgPale, borderRadius: 14, padding: 22, marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                    <span style={{ fontSize: 18 }}>😴</span>
+                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark }}>Le prompt de la flemme.</h3>
+                  </div>
+                  <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 16 }}>T'as pas le temps ou t'as la flemme de vérifier toi-même ? Copie ce prompt. Colle-le dans ChatGPT ou Claude. Donne-lui n'importe quelle info — il applique les 4 questions pour toi.</p>
+                  {!showPrompt ? (
+                    <button className="btn" onClick={() => setShowPrompt(true)} style={{ background: t.green, color: t.white, padding: "10px 24px", borderRadius: 10, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Voir le prompt →</button>
+                  ) : (
+                    <div>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 10, padding: 16, textAlign: "left", marginBottom: 12, maxHeight: 220, overflowY: "auto" }}>
+                        <pre style={{ fontSize: 11 * fs, lineHeight: 1.65, color: t.textMed, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: "'Nunito', sans-serif", fontWeight: 400 }}>{PROMPT_TEXT}</pre>
+                      </div>
+                      <button className="btn" onClick={copyPrompt} style={{ background: copied ? t.greenDeep : t.green, color: t.white, padding: "10px 24px", borderRadius: 10, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>{copied ? "✓ Copié dans le presse-papier" : "Copier le prompt"}</button>
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>Les 4 questions</p>
+                <div className="q-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+                  {questions.map((q) => (
+                    <div key={q.id} className={`q-card ${activeQ === q.id ? "active" : ""}`} onClick={() => setActiveQ(activeQ === q.id ? null : q.id)} style={{ background: t.bgCard, borderRadius: 12, padding: 16, border: `1.5px solid ${activeQ === q.id ? t.green : t.border}`, boxShadow: activeQ === q.id ? `0 4px 16px ${t.green}12` : "none" }}>
+                      <div style={{ fontSize: 22, marginBottom: 8 }}>{q.icon}</div>
+                      <div style={{ fontSize: 14 * fs, fontWeight: 700, color: t.textDark, marginBottom: activeQ === q.id ? 12 : 0 }}>{q.short}</div>
+                      {activeQ === q.id && (
+                        <div>
+                          <p style={{ fontSize: 12 * fs, lineHeight: 1.7, color: t.textMed, marginBottom: 10 }}>{q.detail}</p>
+                          <div style={{ fontSize: 11.5 * fs, fontWeight: 600, color: t.greenDeep, padding: "8px 12px", background: t.bgPale, borderRadius: 8, borderLeft: `3px solid ${t.green}` }}>{q.action}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <button className="btn" onClick={() => setShowSources(!showSources)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 12, background: t.bgMint, border: `1px solid ${t.border}`, fontSize: 13 * fs, fontWeight: 700, color: showSources ? t.greenDeep : t.textMed }}>
+                  <span>📚 Aller plus loin — Sources</span>
+                  <span style={{ fontSize: 12, transform: showSources ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s ease" }}>▾</span>
+                </button>
+                {showSources && (
+                  <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
+                    {ep2Sources.map((s, i) => (
+                      <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
+                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
+                        <div>
+                          <span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span>
+                          <span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* EPISODE 3 — TEASER */}
+        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${t.border}`, overflow: "hidden", marginBottom: 12, opacity: 0.5 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 22px" }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: t.green, flexShrink: 0 }}>3</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>Épisode 3</div>
+              <span style={{ fontSize: 10 * fs, fontWeight: 700, color: "#a67c00", background: "#fec01320", padding: "2px 8px", borderRadius: 100, letterSpacing: "0.05em", textTransform: "uppercase" }}>bientôt</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ETHICS + FOOTER */}
+        <div style={{ marginTop: 36, textAlign: "center" }}>
+          <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${t.border}, transparent)`, marginBottom: 28 }} />
+          <div style={{ background: t.bgCard, border: `1.5px solid ${t.border}`, borderRadius: 14, padding: 24, marginBottom: 24 }}>
+            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Éthique</p>
+            <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.75, maxWidth: 480, margin: "0 auto" }}>
+              Cette série respecte une éthique de traitement de l'information totalement impartiale.
+              Nous utilisons la connaissance des biais cognitifs et des mécanismes sociaux — non pas pour manipuler —
+              mais pour que chacun comprenne comment il est influencé et dispose des outils pour voir plus clair.
+              L'objectif est simple : que tout le monde aille un petit peu mieux à la fin.
+            </p>
+          </div>
+          <div style={{ marginBottom: 28 }}>
+            <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark, marginBottom: 4 }}>Une production Mal Aimé</p>
+            <p style={{ fontSize: 11.5 * fs, color: t.textLight }}>en collaboration avec Claude</p>
+          </div>
+          <div style={{ background: t.bgPale, borderRadius: 14, padding: 24, maxWidth: 480, margin: "0 auto" }}>
+            <p style={{ fontSize: 12.5 * fs, fontStyle: "italic", color: t.textMed, lineHeight: 1.8, marginBottom: 12 }}>
+              « S'il existait une réponse que je pouvais te donner sur le fonctionnement de l'univers —
+              ce ne serait pas spécial. Ce serait juste une machine qui accomplit son dessein cosmique.
+              Ce serait juste un gros mixer débile. Mais puisque rien ne semble avoir de sens —
+              quand tu trouves quelque chose ou quelqu'un qui en a, c'est l'euphorie. »
+            </p>
+            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark }}>— Janet, The Good Place</p>
+          </div>
+          <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 24, lineHeight: 1.5 }}>
+            1'30 pour comprendre — série de vulgarisation philo-psycho-sociologique<br/>Tous les outils sont gratuits et le resteront.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<Toolbox />);
+  </script>
+</body>
+</html>
