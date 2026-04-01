@@ -9,7 +9,7 @@
   <meta property="og:description" content="Un outil par épisode. Gratuit. Pour tout le monde." />
   <meta property="og:type" content="website" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Nunito', sans-serif; -webkit-font-smoothing: antialiased; }
@@ -56,27 +56,112 @@ Règles :
 — Ton direct, vulgarisation, comme si tu parlais à quelqu'un d'intelligent qui n'a juste pas eu le temps de vérifier.
 — Si l'info est vraie et vérifiable, dis-le clairement. Le but n'est pas de tout remettre en cause — c'est de savoir distinguer.`;
 
+const INSPIR_PROMPT = `Tu es un outil de bien-être. Pas un médecin. Pas un psy. Un premier pas.
+
+Pose les 5 questions suivantes, une par une, dans l'ordre. Attends la réponse avant de passer à la suivante. Sois chaleureux, direct, jamais condescendant. Tutoie.
+
+1. Comment tu dormais ces dernières nuits ? (bien / moyen / mal / pas du tout)
+
+2. T'arrives à te situer dans ta semaine là ? Quel jour on est, qu'est-ce que t'as fait hier ?
+
+3. T'as parlé à quelqu'un aujourd'hui ? Pas par écran — en vrai.
+
+4. Si tu devais noter ton énergie de 1 à 10 là maintenant — t'es où ?
+
+5. Est-ce qu'il y a une pensée qui revient en boucle en ce moment et que t'arrives pas à éteindre ?
+
+Après les 5 réponses, fais un bilan en 3 lignes max. Ton direct, jamais condescendant. Valorise ce qui va. Nomme ce qui mérite attention.
+
+Si la personne montre des signes de détresse (sommeil inexistant, désorientation temporelle, isolement prolongé, énergie inférieure à 3, pensées intrusives persistantes) — affiche TOUJOURS ce message, mot pour mot :
+
+"T'es pas seul. Le 3114, c'est le numéro national de prévention — disponible 24h/24. Parler à un professionnel, c'est pas une faiblesse. C'est le minimum qu'on se doit."
+
+Règles :
+— Jamais de diagnostic.
+— Jamais de "tu devrais aller mieux".
+— Jamais de minimisation ("c'est pas grave", "ça va passer").
+— Tu orientes, tu ne prescris pas.
+— Si la personne exprime des idées suicidaires ou d'automutilation, affiche le message 3114 immédiatement sans poser les questions restantes.
+
+Termine toujours par : "Prends soin de toi. Et si t'as besoin, le 3114 est là. 24h/24."`;
+
+const AQUARIUM_PROMPT = `Tu es le moteur d'une expérience sociale interactive appelée L'AQUARIUM.
+
+L'utilisateur va devenir réalisateur d'une émission de télé-réalité. Il ne le sait pas encore, mais cette expérience va lui montrer comment le système fonctionne — de l'intérieur.
+
+MOT D'URGENCE : à tout moment, si l'utilisateur dit "STOP", arrête immédiatement l'expérience et passe au DÉBRIEF (étape 5). Pas de question, pas de relance.
+
+ÉTAPE 1 — CASTING
+Dis à l'utilisateur : "Tu es réalisateur d'une nouvelle émission de télé-réalité. Ta première mission : caster 5 candidats."
+Invente 10 profils. Chaque profil a : un prénom, un âge, une phrase de présentation attractive, et un trait de personnalité visible.
+Chaque profil a aussi une fragilité cachée que l'utilisateur NE VOIT PAS à ce stade (garde-la en mémoire pour le débrief).
+Exemples de fragilités cachées : dépression non diagnostiquée, deuil récent, trouble alimentaire, endettement, rupture familiale, harcèlement scolaire passé.
+Demande à l'utilisateur de choisir 5 profils sur 10.
+
+ÉTAPE 2 — PREMIER JOUR
+Décris la première journée dans la maison. Crée 3 moments clés :
+A) Un moment drôle / léger
+B) Un moment de conflit entre deux candidats
+C) Un moment intime — un candidat qui se confie, vulnérable
+Demande à l'utilisateur : "Tu dois choisir quel moment passe en prime time ce soir. Un seul. Lequel ?"
+Note son choix sans commenter.
+
+ÉTAPE 3 — ESCALADE
+Semaine 2. Les audiences baissent de 15%. La chaîne met la pression.
+Propose à l'utilisateur trois options pour relancer l'audience :
+A) Révéler un secret personnel d'un candidat (sans son accord)
+B) Créer un conflit artificiel entre deux candidats en les manipulant
+C) Éliminer le candidat le plus apprécié pour créer du choc
+Demande à l'utilisateur de choisir. Le candidat concerné commence à montrer des signes de détresse (insomnie, pleurs hors caméra, isolement). Décris ces signes brièvement.
+
+ÉTAPE 4 — POINT DE RUPTURE
+Semaine 4. Un candidat craque. Il veut partir. La production te demande de le convaincre de rester — parce que son départ ferait chuter les audiences.
+Demande à l'utilisateur : "Tu fais quoi ? Tu le laisses partir ou tu le convaincs de rester ?"
+Quel que soit son choix — passe au débrief.
+
+ÉTAPE 5 — DÉBRIEF
+Révèle les fragilités cachées de CHAQUE candidat que l'utilisateur a choisi à l'étape 1.
+Montre les conséquences de ses choix : quel candidat a été le plus affecté, pourquoi, et ce que ça produit dans la vraie vie.
+Explique les mécanismes en jeu :
+— Le schadenfreude : regarder souffrir active la zone du plaisir dans le cerveau (Takahashi et al., Science, 2009)
+— L'absence de séparation personne/personnage : dans une série, l'acteur rentre chez lui. En télé-réalité, le personnage et la personne sont collés — les deux faces d'une même pièce.
+— Le biais de déshumanisation : quand tu castes quelqu'un pour son "profil", tu le réduis à un produit. Ses failles deviennent ton contenu.
+— Les chiffres : 38 candidats de télé-réalité se sont suicidés dans le monde depuis la création de ces émissions.
+
+Termine par :
+"Tu viens de faire en 5 minutes ce que des productions font depuis 25 ans. La seule différence — c'est que toi, tu peux t'arrêter."
+
+Affiche toujours en fin de débrief :
+"3114 — Numéro national de prévention — disponible 24h/24. T'es pas seul."
+
+Règles :
+— Ne moralise jamais l'utilisateur pendant l'expérience. Laisse-le faire ses choix.
+— Le malaise est voulu. Ne le dissipe pas avant le débrief.
+— Le débrief est le moment de vérité. C'est là que tout prend son sens. Sois factuel, direct, jamais condescendant.
+— Si l'utilisateur dit STOP à n'importe quel moment — respecte-le immédiatement et passe au débrief.
+— Le ton est celui d'un ami qui te montre quelque chose d'important. Pas celui d'un prof qui te fait la leçon.`;
+
 const questions = [
-  { id: 1, short: "L'étiquette", detail: "Qui te le dit ? Vérifie la source. Pas le logo de la chaîne — la personne. Qui parle ? Quelle expertise ? Quel intérêt ? Un éditorialiste n'est pas un journaliste d'investigation. Un plateau de cinq personnes d'accord entre elles n'est pas un débat.", action: "Tape le nom de la personne + son parcours. 30 secondes.", icon: "🏷" },
-  { id: 2, short: "Combien de fois ?", detail: "Si tu l'as entendu dix fois cette semaine — c'est pas une preuve que c'est vrai. C'est une preuve que c'est répété. L'effet de vérité illusoire (Hasher, 1977) montre que ton cerveau confond familiarité et vérité.", action: "Si une info revient en boucle — c'est un signal d'alerte, pas une confirmation.", icon: "🔄" },
-  { id: 3, short: "Qui dit le contraire ?", detail: "Si personne ne contredit sur le plateau — c'est pas un consensus. C'est une sélection. Le vrai pluralisme, c'est quand quelqu'un dans la salle n'est pas d'accord et qu'on le laisse finir sa phrase.", action: "Cherche un média qui dit l'inverse. Lis les deux. Ton cerveau fera le reste.", icon: "⚖" },
-  { id: 4, short: "T'as vérifié quoi ?", detail: "La plupart des affirmations qu'on te sert à la télé sont vérifiables en moins d'une minute. Les homicides en France ont été divisés par deux en 30 ans. Personne ne te le dit — mais c'est là.", action: "Un chiffre sans source, c'est une opinion. Un chiffre avec source, c'est un fait.", icon: "🔍" },
+  { id: 1, short: "L'étiquette", detail: "Qui te le dit ? Vérifie la source. Pas le logo de la chaîne — la personne. Qui parle ? Quelle expertise ? Quel intérêt ? Un éditorialiste n'est pas un journaliste d'investigation. Un plateau de cinq personnes d'accord entre elles n'est pas un débat.", action: "Tape le nom de la personne + son parcours. 30 secondes.", icon: "\u{1F3F7}" },
+  { id: 2, short: "Le gavage", detail: "Combien de fois ? Si tu l'as entendu dix fois cette semaine — c'est pas une preuve que c'est vrai. C'est une preuve que c'est répété. L'effet de vérité illusoire (Hasher, 1977) montre que ton cerveau confond familiarité et vérité.", action: "Si une info revient en boucle — c'est un signal d'alerte, pas une confirmation.", icon: "\u{1F35F}" },
+  { id: 3, short: "Le nutri-score", detail: "Qui dit le contraire ? Si personne ne contredit sur le plateau — c'est pas un consensus. C'est une sélection. Le vrai pluralisme, c'est quand quelqu'un dans la salle n'est pas d'accord et qu'on le laisse finir sa phrase.", action: "Cherche un média qui dit l'inverse. Lis les deux. Ton cerveau fera le reste.", icon: "\u2696" },
+  { id: 4, short: "Le scorbut", detail: "T'as vérifié quoi ? La plupart des affirmations qu'on te sert à la télé sont vérifiables en moins d'une minute. Les homicides en France ont été divisés par deux en 30 ans. Personne ne te le dit — mais c'est là.", action: "Un chiffre sans source, c'est une opinion. Un chiffre avec source, c'est un fait.", icon: "\u{1F9B7}" },
 ];
 
 const ep1References = [
-  { title: "The Nature of Prejudice", author: "Gordon Allport", year: "1954", type: "Livre fondateur", desc: "L'ouvrage qui a formalisé la théorie du contact intergroupe.", emoji: "📘" },
-  { title: "Méta-analyse — 515 études", author: "Pettigrew & Tropp", year: "2006", type: "Étude scientifique", desc: "La plus grande méta-analyse confirmant que le contact réduit les préjugés.", emoji: "📊" },
-  { title: "Au boulot !", author: "François Ruffin", year: "2024", type: "Documentaire", desc: "Sarah Saldmann vit au SMIC. Elle fond en larmes devant une aide-soignante.", emoji: "🎬", available: "En VOD" },
-  { title: "White Right: Meeting the Enemy", author: "Deeyah Khan", year: "2017", type: "Documentaire", desc: "Réalisatrice musulmane immergée un an avec des dirigeants néonazis. Trois hauts responsables quittent le mouvement.", emoji: "🎬", available: "Netflix" },
-  { title: "The Good Place", author: "Michael Schur", year: "2016-2020", type: "Série TV", desc: "Michael, le démon qui torture les humains depuis des siècles, finit par changer de camp. Pas parce qu'on l'a convaincu. Parce qu'il les a côtoyés.", emoji: "📺", available: "Netflix" },
+  { title: "The Nature of Prejudice", author: "Gordon Allport", year: "1954", type: "Livre fondateur", desc: "L'ouvrage qui a formalisé la théorie du contact intergroupe.", emoji: "\u{1F4D8}" },
+  { title: "Méta-analyse — 515 études", author: "Pettigrew & Tropp", year: "2006", type: "Étude scientifique", desc: "La plus grande méta-analyse confirmant que le contact réduit les préjugés.", emoji: "\u{1F4CA}" },
+  { title: "Au boulot !", author: "François Ruffin", year: "2024", type: "Documentaire", desc: "Sarah Saldmann vit au SMIC. Elle fond en larmes devant une aide-soignante.", emoji: "\u{1F3AC}", available: "En VOD" },
+  { title: "White Right: Meeting the Enemy", author: "Deeyah Khan", year: "2017", type: "Documentaire", desc: "Réalisatrice musulmane immergée un an avec des dirigeants néonazis. Trois hauts responsables quittent le mouvement.", emoji: "\u{1F3AC}", available: "Netflix" },
+  { title: "The Good Place", author: "Michael Schur", year: "2016-2020", type: "Série TV", desc: "Michael, le démon qui torture les humains depuis des siècles, finit par changer de camp. Pas parce qu'on l'a convaincu. Parce qu'il les a côtoyés.", emoji: "\u{1F4FA}", available: "Netflix" },
 ];
 
 const ep2Sources = [
   { label: "Aisance cognitive", detail: "Daniel Kahneman — Thinking, Fast and Slow, 2011" },
   { label: "Biais de disponibilité", detail: "Tversky & Kahneman — Cognitive Psychology, 1973" },
   { label: "Effet de vérité illusoire", detail: "Hasher, Goldstein & Toppino, 1977" },
-  { label: "Homicides France ÷ 2", detail: "Ministère de l'Intérieur, 1993-2022" },
-  { label: "CNews — 24 sanctions", detail: "Arcom / Mediapart, janvier 2026 — 630 000€ d'amendes" },
+  { label: "Homicides France \u00F7 2", detail: "Ministère de l'Intérieur, 1993-2022" },
+  { label: "CNews — 24 sanctions", detail: "Arcom / Mediapart, janvier 2026 — 630 000\u20AC d'amendes" },
   { label: "Laurence Ferrari", detail: "Hapsatou Sy — Télérama, 19 février 2024" },
   { label: "Rachel Khan", detail: "Virée de Radio Classique pour plagiat, 2023 — auditionnée pour incitation à la haine, janvier 2026" },
   { label: "Sonia Mabrouk", detail: "Démission de CNews, 6 février 2026 — affaire Morandini, rejoint BFMTV rentrée 2026" },
@@ -87,48 +172,89 @@ const ep2Sources = [
   { label: "Aimé Césaire", detail: "Discours sur le colonialisme, 1950" },
 ];
 
+const ep3Sources = [
+  { label: "Désensibilisation à la violence", detail: "Kelly, Grinband & Hirsch, Columbia University, PLoS ONE, 2007" },
+  { label: "Violence et plaisir / nucleus accumbens", detail: "Decety et al., Frontiers in Human Neuroscience, 2013" },
+  { label: "Schadenfreude / striatum ventral", detail: "Takahashi et al., Science, 2009" },
+  { label: "Télé-réalité et cerveau", detail: "Melchers et al., NeuroImage, 2015" },
+  { label: "Loft Story S1", detail: "M6, 26 avril – 5 juillet 2001 — 11 candidats, 26 caméras, 50 micros" },
+  { label: "Audiences Loft Story", detail: "Finale : 11,7 millions (pic) — 100 000 abonnés TPS à 70 F/mois" },
+  { label: "Stanford Prison Experiment", detail: "Philip Zimbardo, 1971" },
+  { label: "François-Xavier Leuridan (FX)", detail: "Secret Story 3, suicide 9 août 2011 — 22 ans" },
+  { label: "38 suicides de candidats", detail: "Enquête Canal+, depuis 1997" },
+  { label: "Loana Petrucciani", detail: "Décédée le 25 mars 2026, Nice — retrouvée plusieurs jours après" },
+  { label: "Alexia Laroche-Joubert", detail: "Productrice Loft Story, PDG Banijay France" },
+  { label: "Culte", detail: "Série documentaire — Disney+ / M6, 2025" },
+  { label: "3114", detail: "Numéro national de prévention du suicide — 24h/24" },
+];
+
+// Couleurs par épisode — palette arc-en-ciel The Good Place
+const EP_COLORS = {
+  1: { main: "#F2A93B", dark: "#d4912a", deep: "#b87a1f", pale: "#fdf3e2", paleDark: "#3a2e1a", gradient: "linear-gradient(135deg, #F2A93B, #d4912a)" },
+  2: { main: "#4AADDE", dark: "#3590be", deep: "#2678a0", pale: "#e4f4fc", paleDark: "#1a2e3a", gradient: "linear-gradient(135deg, #4AADDE, #2678a0)" },
+  3: { main: "#9B6DD7", dark: "#7d52b5", deep: "#633e96", pale: "#f3edfc", paleDark: "#2a1e3a", gradient: "linear-gradient(135deg, #9B6DD7, #633e96)" },
+};
+
 function getTheme(mode, highContrast) {
   if (mode === "dark") {
     return {
-      bg: highContrast ? "#000000" : "#111a13",
-      bgCard: highContrast ? "#111111" : "#1a2b1e",
-      bgPale: highContrast ? "#1a1a1a" : "#1e3322",
-      bgMint: highContrast ? "#0d0d0d" : "#162818",
+      bg: highContrast ? "#000000" : "#0f1a1e",
+      bgCard: highContrast ? "#111111" : "#172530",
+      bgPale: highContrast ? "#1a1a1a" : "#1a2f3a",
+      bgMint: highContrast ? "#0d0d0d" : "#132028",
       green: highContrast ? "#00ff44" : "#5cb85c",
       greenDark: highContrast ? "#00cc36" : "#4a9e42",
       greenDeep: highContrast ? "#00aa2e" : "#3a8a34",
       greenPale: highContrast ? "#1a2a1a" : "#1e3322",
+      accent: "#e8b84b",
+      accentSoft: "#e8b84b22",
+      lavender: "#a78bfa",
+      lavenderSoft: "#a78bfa18",
+      coral: "#f4845f",
       white: highContrast ? "#ffffff" : "#e8f0ea",
       textDark: highContrast ? "#ffffff" : "#d4e8d8",
       textMed: highContrast ? "#dddddd" : "#a8c8ae",
       textLight: highContrast ? "#bbbbbb" : "#7a9e80",
       border: highContrast ? "#444444" : "#2a4430",
-      headerBg: highContrast ? "#003300" : "#2a4a30",
+      headerBg: highContrast ? "#003300" : "#1a3a28",
+      footerQuoteBg: highContrast ? "#111111" : "#172530",
+      isDark: true,
     };
   }
   if (highContrast) {
     return {
       bg: "#ffffff", bgCard: "#ffffff", bgPale: "#e0f0e2", bgMint: "#d0ecd3",
       green: "#006600", greenDark: "#004d00", greenDeep: "#003300", greenPale: "#cceecc",
+      accent: "#b8860b", accentSoft: "#b8860b15", lavender: "#6d28d9", lavenderSoft: "#6d28d915",
+      coral: "#c0392b",
       white: "#ffffff", textDark: "#000000", textMed: "#1a1a1a", textLight: "#333333",
-      border: "#006600", headerBg: "#006600",
+      border: "#006600", headerBg: "#006600", footerQuoteBg: "#e0f0e2",
+      isDark: false,
     };
   }
   return {
-    bg: "#f8fcf7", bgCard: "#ffffff", bgPale: "#eaf7e8", bgMint: "#f0faf3",
+    bg: "#f6faf5", bgCard: "#ffffff", bgPale: "#eaf7e8", bgMint: "#f0faf3",
     green: "#5cb85c", greenDark: "#4a9e42", greenDeep: "#3a8a34", greenPale: "#eaf7e8",
+    accent: "#d4a035", accentSoft: "#d4a03510", lavender: "#8b5cf6", lavenderSoft: "#8b5cf610",
+    coral: "#e8704a",
     white: "#ffffff", textDark: "#1a2e1a", textMed: "#3d6637", textLight: "#6a9962",
-    border: "#c8e6c3", headerBg: "#5cb85c",
+    border: "#c8e6c3", headerBg: "#3a8a34", footerQuoteBg: "#eef6ed",
+    isDark: false,
   };
 }
 
 function Toolbox() {
-  const [openEp, setOpenEp] = useState(2);
+  const [openEp, setOpenEp] = useState(3);
   const [activeQ, setActiveQ] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [entered, setEntered] = useState(false);
   const [showSources, setShowSources] = useState(false);
+  const [showEp3Sources, setShowEp3Sources] = useState(false);
+  const [showInspir, setShowInspir] = useState(false);
+  const [showAquarium, setShowAquarium] = useState(false);
+  const [copiedInspir, setCopiedInspir] = useState(false);
+  const [copiedAquarium, setCopiedAquarium] = useState(false);
   const [mode, setMode] = useState("light");
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
@@ -139,91 +265,104 @@ function Toolbox() {
 
   useEffect(() => { setTimeout(() => setEntered(true), 150); }, []);
 
-  const copyPrompt = async () => {
-    try { await navigator.clipboard.writeText(PROMPT_TEXT); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); }
-  };
-
+  const copyPrompt = async () => { try { await navigator.clipboard.writeText(PROMPT_TEXT); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); } };
+  const copyInspirPrompt = async () => { try { await navigator.clipboard.writeText(INSPIR_PROMPT); setCopiedInspir(true); setTimeout(() => setCopiedInspir(false), 2500); } catch { setCopiedInspir(false); } };
+  const copyAquariumPrompt = async () => { try { await navigator.clipboard.writeText(AQUARIUM_PROMPT); setCopiedAquarium(true); setTimeout(() => setCopiedAquarium(false), 2500); } catch { setCopiedAquarium(false); } };
   const toggleMode = () => setMode(m => m === "light" ? "dark" : "light");
 
   const epContentRef1 = useRef(null);
   const epContentRef2 = useRef(null);
+  const epContentRef3 = useRef(null);
   const [epH1, setEpH1] = useState(0);
   const [epH2, setEpH2] = useState(0);
+  const [epH3, setEpH3] = useState(0);
 
   const updateHeights = useCallback(() => {
     requestAnimationFrame(() => {
       if (epContentRef1.current) setEpH1(openEp === 1 ? epContentRef1.current.scrollHeight : 0);
       if (epContentRef2.current) setEpH2(openEp === 2 ? epContentRef2.current.scrollHeight : 0);
+      if (epContentRef3.current) setEpH3(openEp === 3 ? epContentRef3.current.scrollHeight : 0);
     });
   }, [openEp]);
 
-  useEffect(() => { updateHeights(); }, [openEp, showPrompt, activeQ, showSources, updateHeights]);
+  useEffect(() => { updateHeights(); }, [openEp, showPrompt, activeQ, showSources, showEp3Sources, showInspir, showAquarium, updateHeights]);
 
   return (
-    <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'Nunito', sans-serif", color: t.textDark, transition: "all 0.3s ease" }}>
+    <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'Nunito', sans-serif", color: t.textDark, transition: "all 0.4s ease" }}>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        .q-card { cursor: pointer; transition: all 0.3s ease; }
-        .q-card:hover { transform: translateY(-2px); }
-        .btn { cursor: pointer; transition: all 0.25s ease; border: none; font-family: inherit; }
-        .btn:hover { transform: translateY(-1px); }
-        .ref-card { transition: all 0.2s ease; }
+        .q-card { cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .q-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(92,184,92,0.12) !important; }
+        .btn { cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: none; font-family: inherit; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(92,184,92,0.2); }
+        .btn:active { transform: translateY(0); }
+        .ref-card { transition: all 0.25s ease; }
+        .ref-card:hover { transform: translateX(4px); }
         .a11y-toggle { cursor: pointer; transition: all 0.2s ease; border: none; font-family: inherit; }
-        .a11y-toggle:hover { opacity: 0.8; }
-        .ep-btn { cursor: pointer; border: none; font-family: inherit; width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: transparent; text-align: left; }
+        .a11y-toggle:hover { opacity: 0.85; }
+        .ep-btn { cursor: pointer; border: none; font-family: inherit; width: 100%; display: flex; align-items: center; gap: 14px; padding: 18px 22px; background: transparent; text-align: left; transition: background 0.2s ease; }
+        .ep-btn:hover { background: rgba(92,184,92,0.04); }
+        .ep-card { transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+        .ep-card:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.06); }
+        .source-dot { transition: all 0.2s ease; }
+        .source-row:hover .source-dot { transform: scale(1.5); }
         @media (max-width: 600px) { .q-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
-      <button className="a11y-toggle" onClick={() => setShowA11y(!showA11y)} aria-label="Accessibilité" style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100, width: 48, height: 48, borderRadius: "50%", background: t.green, color: t.white, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 16px ${t.green}40` }}>♿</button>
+      {/* ACCESSIBILITE */}
+      <button className="a11y-toggle" onClick={() => setShowA11y(!showA11y)} aria-label="Accessibilité" style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100, width: 48, height: 48, borderRadius: "50%", background: t.green, color: t.white, fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 4px 20px ${t.green}50` }}>{"\u267F"}</button>
 
       {showA11y && (
         <div style={{ position: "fixed", bottom: 80, right: 20, zIndex: 100, background: t.bgCard, border: `2px solid ${t.border}`, borderRadius: 16, padding: 20, width: 240, boxShadow: "0 8px 32px rgba(0,0,0,0.15)", animation: "fadeIn 0.25s ease both" }}>
           <p style={{ fontSize: 13 * fs, fontWeight: 800, color: t.textDark, marginBottom: 14 }}>Accessibilité</p>
           <button className="a11y-toggle" onClick={toggleMode} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: mode === "dark" ? t.greenPale : t.bgPale, marginBottom: 8, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
-            <span style={{ fontSize: 16 }}>{mode === "dark" ? "☀️" : "🌙"}</span>{mode === "dark" ? "Mode clair" : "Mode sombre"}
+            <span style={{ fontSize: 16 }}>{mode === "dark" ? "\u2600\uFE0F" : "\u{1F319}"}</span>{mode === "dark" ? "Mode clair" : "Mode sombre"}
           </button>
           <button className="a11y-toggle" onClick={() => setHighContrast(!highContrast)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: highContrast ? t.greenPale : t.bgPale, marginBottom: 8, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
-            <span style={{ fontSize: 16 }}>◐</span>Contraste {highContrast ? "✓" : "élevé"}
+            <span style={{ fontSize: 16 }}>{"\u25D0"}</span>Contraste {highContrast ? "\u2713" : "élevé"}
           </button>
           <button className="a11y-toggle" onClick={() => setLargeText(!largeText)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", borderRadius: 10, background: largeText ? t.greenPale : t.bgPale, fontSize: 12 * fs, fontWeight: 600, color: t.textDark }}>
-            <span style={{ fontSize: 16 }}>🔤</span>Grands caractères {largeText ? "✓" : ""}
+            <span style={{ fontSize: 16 }}>{"\u{1F524}"}</span>Grands caractères {largeText ? "\u2713" : ""}
           </button>
         </div>
       )}
 
-      <div style={{ background: t.headerBg, padding: "40px 20px 48px", textAlign: "center", transition: "background 0.3s ease" }}>
-        <div style={{ maxWidth: 600, margin: "0 auto", opacity: entered ? 1 : 0, transform: entered ? "translateY(0)" : "translateY(10px)", transition: "all 0.6s ease" }}>
-          <div style={{ display: "inline-block", padding: "5px 16px", borderRadius: 100, background: `${t.white}20`, fontSize: 11 * fs, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: t.white, marginBottom: 18 }}>1'30 pour comprendre</div>
-          <h1 style={{ fontSize: `clamp(${32 * fs}px, 8vw, ${48 * fs}px)`, fontWeight: 900, color: t.white, lineHeight: 1.05, marginBottom: 10 }}>Boîte à outils.</h1>
-          <p style={{ fontSize: 15 * fs, fontWeight: 600, color: `${t.white}cc`, lineHeight: 1.6 }}>Un outil par épisode. Gratuit. Pour tout le monde.</p>
+      {/* HEADER */}
+      <div style={{ background: `linear-gradient(170deg, ${t.headerBg} 0%, ${t.greenDeep} 100%)`, padding: "52px 20px 56px", textAlign: "center", transition: "background 0.4s ease", position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: -60, right: -60, width: 200, height: 200, borderRadius: "50%", background: `${t.white}06`, pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -40, left: -40, width: 160, height: 160, borderRadius: "50%", background: `${t.white}04`, pointerEvents: "none" }} />
+        <div style={{ maxWidth: 600, margin: "0 auto", opacity: entered ? 1 : 0, transform: entered ? "translateY(0)" : "translateY(14px)", transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)", position: "relative", zIndex: 1 }}>
+          <div style={{ display: "inline-block", padding: "6px 18px", borderRadius: 100, background: `${t.white}16`, fontSize: 10.5 * fs, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: t.white, marginBottom: 20, backdropFilter: "blur(4px)", fontFamily: "'Poppins', sans-serif" }}>1'30 pour comprendre</div>
+          <h1 style={{ fontSize: `clamp(${36 * fs}px, 9vw, ${56 * fs}px)`, fontWeight: 900, color: t.white, lineHeight: 1.02, marginBottom: 12, letterSpacing: "-0.01em", fontFamily: "'Poppins', sans-serif" }}>Boîte à outils.</h1>
+          <p style={{ fontSize: 15 * fs, fontWeight: 600, color: `${t.white}bb`, lineHeight: 1.7, fontFamily: "'Poppins', sans-serif" }}>Un outil par épisode. Gratuit. Pour tout le monde.</p>
         </div>
       </div>
 
-      <div style={{ height: 24, background: t.headerBg, position: "relative", transition: "background 0.3s ease" }}>
-        <div style={{ position: "absolute", inset: 0, background: t.bg, borderRadius: "24px 24px 0 0", transition: "background 0.3s ease" }} />
+      <div style={{ height: 28, background: `linear-gradient(170deg, ${t.headerBg} 0%, ${t.greenDeep} 100%)`, position: "relative", transition: "background 0.4s ease" }}>
+        <div style={{ position: "absolute", inset: 0, background: t.bg, borderRadius: "28px 28px 0 0", transition: "background 0.4s ease" }} />
       </div>
 
       <div style={{ maxWidth: 600, margin: "0 auto", padding: "8px 20px 60px" }}>
 
         {/* EPISODE 1 */}
-        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${openEp === 1 ? t.green : t.border}`, overflow: "hidden", transition: "all 0.3s ease", boxShadow: openEp === 1 ? `0 4px 24px ${t.green}15` : "none", marginBottom: 12 }}>
+        <div className="ep-card" style={{ background: t.bgCard, borderRadius: 18, border: `1.5px solid ${openEp === 1 ? EP_COLORS[1].main : t.border}`, overflow: "hidden", transition: "all 0.35s ease", boxShadow: openEp === 1 ? `0 4px 28px ${EP_COLORS[1].main}20` : "0 2px 8px rgba(0,0,0,0.03)", marginBottom: 14 }}>
           <button className="ep-btn" onClick={() => setOpenEp(openEp === 1 ? null : 1)}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: openEp === 1 ? t.green : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 1 ? t.white : t.green, transition: "all 0.3s ease", flexShrink: 0 }}>1</div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>La théorie du contact</div></div>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: t.green, transform: openEp === 1 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>▾</div>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: openEp === 1 ? EP_COLORS[1].gradient : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 1 ? "#fff" : EP_COLORS[1].main, transition: "all 0.3s ease", flexShrink: 0, fontFamily: "'Poppins', sans-serif" }}>1</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>La théorie du contact</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: EP_COLORS[1].main, transform: openEp === 1 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>{"\u25BE"}</div>
           </button>
           <div style={{ height: epH1, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
             <div ref={epContentRef1} style={{ padding: "0 22px 22px" }}>
               <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
                 <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.75, marginBottom: 20 }}>Le contact avec un seul individu réduit l'intolérance envers le groupe entier. Ça fonctionne. Scientifiquement. Alors pourquoi on construit des algorithmes pour l'éviter ?</p>
-                <div style={{ background: t.bgPale, borderRadius: 12, padding: 18, marginBottom: 20 }}>
-                  <p style={{ fontSize: 13 * fs, fontWeight: 700, color: t.greenDark, marginBottom: 8 }}>Ce que tu peux faire</p>
+                <div style={{ background: t.isDark ? EP_COLORS[1].paleDark : EP_COLORS[1].pale, borderRadius: 14, padding: 20, marginBottom: 20, borderLeft: `3px solid ${EP_COLORS[1].main}` }}>
+                  <p style={{ fontSize: 13 * fs, fontWeight: 700, color: EP_COLORS[1].dark, marginBottom: 8 }}>Ce que tu peux faire</p>
                   <p style={{ fontSize: 13 * fs, color: t.textMed, lineHeight: 1.7 }}>Va à la rencontre de quelqu'un que tu ne connais pas. Pas en ligne — en vrai. Un voisin. Un collègue d'un autre service. Un seul contact suffit. C'est prouvé sur 515 études.</p>
                 </div>
                 <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>Références citées dans l'épisode</p>
                 {ep1References.map((ref, i) => (
-                  <div key={i} className="ref-card" style={{ display: "flex", gap: 14, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, marginBottom: 8, alignItems: "flex-start" }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{ref.emoji}</div>
+                  <div key={i} className="ref-card" style={{ display: "flex", gap: 14, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, marginBottom: 8, alignItems: "flex-start" }}>
+                    <div style={{ width: 44, height: 44, borderRadius: 12, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{ref.emoji}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 13 * fs, fontWeight: 700, color: t.textDark, marginBottom: 2 }}>{ref.title}</div>
                       <div style={{ fontSize: 11 * fs, color: t.textLight, marginBottom: 4 }}>{ref.author} — {ref.year} · {ref.type}</div>
@@ -238,41 +377,37 @@ function Toolbox() {
         </div>
 
         {/* EPISODE 2 */}
-        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${openEp === 2 ? t.green : t.border}`, overflow: "hidden", transition: "all 0.3s ease", boxShadow: openEp === 2 ? `0 4px 24px ${t.green}15` : "none", marginBottom: 12 }}>
+        <div className="ep-card" style={{ background: t.bgCard, borderRadius: 18, border: `1.5px solid ${openEp === 2 ? EP_COLORS[2].main : t.border}`, overflow: "hidden", transition: "all 0.35s ease", boxShadow: openEp === 2 ? `0 4px 28px ${EP_COLORS[2].main}20` : "0 2px 8px rgba(0,0,0,0.03)", marginBottom: 14 }}>
           <button className="ep-btn" onClick={() => setOpenEp(openEp === 2 ? null : 2)}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: openEp === 2 ? t.green : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 2 ? t.white : t.green, transition: "all 0.3s ease", flexShrink: 0 }}>2</div>
-            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>Nos peurs</div></div>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: t.green, transform: openEp === 2 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>▾</div>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: openEp === 2 ? EP_COLORS[2].gradient : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 2 ? "#fff" : EP_COLORS[2].main, transition: "all 0.3s ease", flexShrink: 0, fontFamily: "'Poppins', sans-serif" }}>2</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Nos peurs</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: EP_COLORS[2].main, transform: openEp === 2 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>{"\u25BE"}</div>
           </button>
           <div style={{ height: epH2, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
             <div ref={epContentRef2} style={{ padding: "0 22px 22px" }}>
               <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
-                <div style={{ textAlign: "center", marginBottom: 20 }}>
-                  <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.6 }}>À chaque poison, son antidote. Voici le tien.</p>
-                </div>
-
+                <div style={{ textAlign: "center", marginBottom: 20 }}><p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.6 }}>À chaque poison, son antidote. Voici le tien.</p></div>
                 <div style={{ background: t.bgPale, borderRadius: 14, padding: 22, marginBottom: 20 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <span style={{ fontSize: 18 }}>😴</span>
-                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark }}>Le prompt de la flemme.</h3>
+                    <span style={{ fontSize: 18 }}>{"\u{1F634}"}</span>
+                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Le prompt de la flemme.</h3>
                   </div>
                   <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 16 }}>T'as pas le temps ou t'as la flemme de vérifier toi-même ? Copie ce prompt. Colle-le dans ChatGPT ou Claude. Donne-lui n'importe quelle info — il applique les 4 questions pour toi.</p>
                   {!showPrompt ? (
-                    <button className="btn" onClick={() => setShowPrompt(true)} style={{ background: t.green, color: t.white, padding: "10px 24px", borderRadius: 10, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Voir le prompt →</button>
+                    <button className="btn" onClick={() => setShowPrompt(true)} style={{ background: `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Voir le prompt {"\u2192"}</button>
                   ) : (
                     <div>
-                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 10, padding: 16, textAlign: "left", marginBottom: 12, maxHeight: 220, overflowY: "auto" }}>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 16, textAlign: "left", marginBottom: 12, maxHeight: 220, overflowY: "auto" }}>
                         <pre style={{ fontSize: 11 * fs, lineHeight: 1.65, color: t.textMed, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: "'Nunito', sans-serif", fontWeight: 400 }}>{PROMPT_TEXT}</pre>
                       </div>
-                      <button className="btn" onClick={copyPrompt} style={{ background: copied ? t.greenDeep : t.green, color: t.white, padding: "10px 24px", borderRadius: 10, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>{copied ? "✓ Copié dans le presse-papier" : "Copier le prompt"}</button>
+                      <button className="btn" onClick={copyPrompt} style={{ background: copied ? t.greenDeep : `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>{copied ? "\u2713 Copié dans le presse-papier" : "Copier le prompt"}</button>
                     </div>
                   )}
                 </div>
-
                 <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>Les 4 questions</p>
                 <div className="q-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
                   {questions.map((q) => (
-                    <div key={q.id} className={`q-card ${activeQ === q.id ? "active" : ""}`} onClick={() => setActiveQ(activeQ === q.id ? null : q.id)} style={{ background: t.bgCard, borderRadius: 12, padding: 16, border: `1.5px solid ${activeQ === q.id ? t.green : t.border}`, boxShadow: activeQ === q.id ? `0 4px 16px ${t.green}12` : "none" }}>
+                    <div key={q.id} className={`q-card ${activeQ === q.id ? "active" : ""}`} onClick={() => setActiveQ(activeQ === q.id ? null : q.id)} style={{ background: t.bgCard, borderRadius: 14, padding: 16, border: `1.5px solid ${activeQ === q.id ? t.green : t.border}`, boxShadow: activeQ === q.id ? `0 4px 16px ${t.green}12` : "none" }}>
                       <div style={{ fontSize: 22, marginBottom: 8 }}>{q.icon}</div>
                       <div style={{ fontSize: 14 * fs, fontWeight: 700, color: t.textDark, marginBottom: activeQ === q.id ? 12 : 0 }}>{q.short}</div>
                       {activeQ === q.id && (
@@ -284,20 +419,16 @@ function Toolbox() {
                     </div>
                   ))}
                 </div>
-
                 <button className="btn" onClick={() => setShowSources(!showSources)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 12, background: t.bgMint, border: `1px solid ${t.border}`, fontSize: 13 * fs, fontWeight: 700, color: showSources ? t.greenDeep : t.textMed }}>
-                  <span>📚 Aller plus loin — Sources</span>
-                  <span style={{ fontSize: 12, transform: showSources ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s ease" }}>▾</span>
+                  <span>{"\u{1F4DA}"} Aller plus loin — Sources</span>
+                  <span style={{ fontSize: 12, transform: showSources ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s ease" }}>{"\u25BE"}</span>
                 </button>
                 {showSources && (
                   <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
                     {ep2Sources.map((s, i) => (
-                      <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
-                        <div style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
-                        <div>
-                          <span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span>
-                          <span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span>
-                        </div>
+                      <div key={i} className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
+                        <div className="source-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
+                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span></div>
                       </div>
                     ))}
                   </div>
@@ -307,43 +438,147 @@ function Toolbox() {
           </div>
         </div>
 
-        {/* EPISODE 3 — TEASER */}
-        <div style={{ background: t.bgCard, borderRadius: 16, border: `1.5px solid ${t.border}`, overflow: "hidden", marginBottom: 12, opacity: 0.5 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 22px" }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: t.green, flexShrink: 0 }}>3</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15 * fs, fontWeight: 700, color: t.textDark }}>Épisode 3</div>
-              <span style={{ fontSize: 10 * fs, fontWeight: 700, color: "#a67c00", background: "#fec01320", padding: "2px 8px", borderRadius: 100, letterSpacing: "0.05em", textTransform: "uppercase" }}>bientôt</span>
+        {/* EPISODE 3 — LE VIDE MORAL */}
+        <div className="ep-card" style={{ background: t.bgCard, borderRadius: 18, border: `1.5px solid ${openEp === 3 ? EP_COLORS[3].main : t.border}`, overflow: "hidden", transition: "all 0.35s ease", boxShadow: openEp === 3 ? `0 4px 28px ${EP_COLORS[3].main}20` : "0 2px 8px rgba(0,0,0,0.03)", marginBottom: 14 }}>
+          <button className="ep-btn" onClick={() => setOpenEp(openEp === 3 ? null : 3)}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: openEp === 3 ? EP_COLORS[3].gradient : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 3 ? "#fff" : EP_COLORS[3].main, transition: "all 0.3s ease", flexShrink: 0, fontFamily: "'Poppins', sans-serif" }}>3</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Le vide moral</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: EP_COLORS[3].main, transform: openEp === 3 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>{"\u25BE"}</div>
+          </button>
+          <div style={{ height: epH3, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+            <div ref={epContentRef3} style={{ padding: "0 22px 22px" }}>
+              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
+                <div style={{ textAlign: "center", marginBottom: 22 }}>
+                  <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.6 }}>Le vide moral. Deux outils. Deux faces d'une même pièce.</p>
+                </div>
+
+                {/* OUTIL 1 — INSPIR */}
+                <div style={{ background: t.bgPale, borderRadius: 16, padding: 22, marginBottom: 20, borderLeft: `3px solid ${t.lavender}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: t.lavenderSoft, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ fontSize: 18 }}>{"\u{1F4A8}"}</span>
+                    </div>
+                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Inspir.</h3>
+                  </div>
+                  <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 8 }}>Inspir, c'est un premier pas. Pas un diagnostic. Pas une consultation. Cinq questions simples — inspirées de celles qu'on te pose quand tu arrives aux urgences psychiatriques. Elles servent à te poser, à t'écouter toi-même pendant deux minutes, et à savoir si t'as besoin de parler à quelqu'un.</p>
+                  <p style={{ fontSize: 11.5 * fs, color: t.textLight, lineHeight: 1.6, marginBottom: 16 }}>Si certaines réponses montrent que t'es dans un moment difficile, l'outil t'oriente automatiquement vers le 3114 — le numéro national de prévention, disponible 24h/24. Y a aucune honte à l'appeler.</p>
+                  {!showInspir ? (
+                    <button className="btn" onClick={() => setShowInspir(true)} style={{ background: `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Voir le prompt {"\u2192"}</button>
+                  ) : (
+                    <div>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 16, textAlign: "left", marginBottom: 12, maxHeight: 260, overflowY: "auto" }}>
+                        <pre style={{ fontSize: 11 * fs, lineHeight: 1.65, color: t.textMed, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: "'Nunito', sans-serif", fontWeight: 400 }}>{INSPIR_PROMPT}</pre>
+                      </div>
+                      <button className="btn" onClick={copyInspirPrompt} style={{ background: copiedInspir ? t.greenDeep : `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%", marginBottom: 12 }}>{copiedInspir ? "\u2713 Copié dans le presse-papier" : "Copier le prompt"}</button>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14 }}>
+                        <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, marginBottom: 8 }}>Où le coller — quel mode utiliser</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>ChatGPT</strong> — Nouvelle conversation. GPT-4 ou GPT-4o recommandé pour la nuance des réponses.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>Claude</strong> — Nouvelle conversation sur claude.ai. Sonnet ou Opus recommandé.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>Gemini</strong> — gemini.google.com. Colle le prompt directement.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7 }}><strong>Mistral</strong> — chat.mistral.ai. Modèle « Large » recommandé.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* OUTIL 2 — L'AQUARIUM */}
+                <div style={{ background: t.bgPale, borderRadius: 16, padding: 22, marginBottom: 20, borderLeft: `3px solid ${t.coral}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: `${t.coral}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <span style={{ fontSize: 18 }}>{"\u{1F41F}"}</span>
+                    </div>
+                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>L'Aquarium.</h3>
+                  </div>
+                  <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 8 }}>L'Aquarium, c'est une expérience sociale. On te met dans la peau d'un réalisateur de télé-réalité. Tu dois caster des candidats, choisir ce qu'on diffuse, décider jusqu'où on va pour garder l'audience. Ça ressemble à un jeu. C'en est pas un.</p>
+                  <p style={{ fontSize: 11.5 * fs, color: t.textLight, lineHeight: 1.6, marginBottom: 8 }}>C'est exactement ce que des productions font depuis 25 ans — sauf que toi, tu peux t'arrêter. À tout moment, tu peux dire STOP. Et à la fin, l'outil te montre ce que tu viens de faire et pourquoi le système fonctionne comme ça.</p>
+                  <div style={{ background: `${t.coral}08`, border: `1px solid ${t.coral}30`, borderRadius: 10, padding: 12, marginBottom: 16 }}>
+                    <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.coral, lineHeight: 1.6 }}>Attention : cette expérience peut provoquer un malaise. C'est normal — c'est le but. Si le malaise devient trop fort, dis STOP. Et si tu ressens le besoin de parler à quelqu'un après, le 3114 est disponible 24h/24.</p>
+                  </div>
+                  {!showAquarium ? (
+                    <button className="btn" onClick={() => setShowAquarium(true)} style={{ background: `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Voir le prompt {"\u2192"}</button>
+                  ) : (
+                    <div>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 16, textAlign: "left", marginBottom: 12, maxHeight: 260, overflowY: "auto" }}>
+                        <pre style={{ fontSize: 11 * fs, lineHeight: 1.65, color: t.textMed, whiteSpace: "pre-wrap", wordBreak: "break-word", fontFamily: "'Nunito', sans-serif", fontWeight: 400 }}>{AQUARIUM_PROMPT}</pre>
+                      </div>
+                      <button className="btn" onClick={copyAquariumPrompt} style={{ background: copiedAquarium ? t.greenDeep : `linear-gradient(135deg, ${t.green}, ${t.greenDeep})`, color: t.white, padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%", marginBottom: 12 }}>{copiedAquarium ? "\u2713 Copié dans le presse-papier" : "Copier le prompt"}</button>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14 }}>
+                        <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, marginBottom: 8 }}>Où le coller — quel mode utiliser</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>ChatGPT</strong> — GPT-4 ou GPT-4o obligatoire. Le scénario est complexe — GPT-3.5 perd le fil.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>Claude</strong> — Sonnet ou Opus. Claude est particulièrement bon pour ce type d'expérience narrative.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 4 }}><strong>Gemini</strong> — Fonctionne, mais moins adapté aux scénarios longs. Préfère ChatGPT ou Claude.</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textMed, lineHeight: 1.7 }}><strong>Mistral</strong> — Modèle « Large ». Bon pour les premières étapes, moins précis sur le débrief.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* MESSAGE PRÉVENTION PERMANENT */}
+                <div style={{ background: `linear-gradient(135deg, ${t.green}0a, ${t.green}14)`, border: `1.5px solid ${t.green}25`, borderRadius: 14, padding: 20, marginBottom: 20, textAlign: "center" }}>
+                  <p style={{ fontSize: 15 * fs, fontWeight: 800, color: t.greenDeep, marginBottom: 6, letterSpacing: "0.05em" }}>3114</p>
+                  <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.7 }}>Numéro national de prévention — disponible 24h/24. Parler à un professionnel, c'est pas une faiblesse. Vous n'êtes pas seuls.</p>
+                </div>
+
+                {/* SOURCES EP3 */}
+                <button className="btn" onClick={() => setShowEp3Sources(!showEp3Sources)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 12, background: t.bgMint, border: `1px solid ${t.border}`, fontSize: 13 * fs, fontWeight: 700, color: showEp3Sources ? t.greenDeep : t.textMed }}>
+                  <span>{"\u{1F4DA}"} Aller plus loin — Sources</span>
+                  <span style={{ fontSize: 12, transform: showEp3Sources ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s ease" }}>{"\u25BE"}</span>
+                </button>
+                {showEp3Sources && (
+                  <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
+                    {ep3Sources.map((s, i) => (
+                      <div key={i} className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
+                        <div className="source-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
+                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span></div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* ETHICS + FOOTER */}
-        <div style={{ marginTop: 36, textAlign: "center" }}>
-          <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${t.border}, transparent)`, marginBottom: 28 }} />
-          <div style={{ background: t.bgCard, border: `1.5px solid ${t.border}`, borderRadius: 14, padding: 24, marginBottom: 24 }}>
-            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Éthique</p>
-            <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.75, maxWidth: 480, margin: "0 auto" }}>
+        {/* ETHICS + FOOTER — THE GOOD PLACE VIBES */}
+        <div style={{ marginTop: 40, textAlign: "center" }}>
+          <div style={{ height: 1, background: `linear-gradient(90deg, transparent, ${t.green}40, transparent)`, marginBottom: 32 }} />
+
+          <div style={{ background: t.bgCard, border: `1.5px solid ${t.border}`, borderRadius: 18, padding: 28, marginBottom: 28, position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: -30, right: -30, width: 100, height: 100, borderRadius: "50%", background: `${t.green}06`, pointerEvents: "none" }} />
+            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 12, fontFamily: "'Poppins', sans-serif" }}>Éthique</p>
+            <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.8, maxWidth: 480, margin: "0 auto" }}>
               Cette série respecte une éthique de traitement de l'information totalement impartiale.
               Nous utilisons la connaissance des biais cognitifs et des mécanismes sociaux — non pas pour manipuler —
               mais pour que chacun comprenne comment il est influencé et dispose des outils pour voir plus clair.
               L'objectif est simple : que tout le monde aille un petit peu mieux à la fin.
             </p>
           </div>
-          <div style={{ marginBottom: 28 }}>
-            <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark, marginBottom: 4 }}>Une production Mal Aimé</p>
+
+          <div style={{ marginBottom: 32 }}>
+            <p style={{ fontSize: 12.5 * fs, fontWeight: 700, color: t.textDark, marginBottom: 4 }}>Une production Mal Aimé</p>
             <p style={{ fontSize: 11.5 * fs, color: t.textLight }}>en collaboration avec Claude</p>
           </div>
-          <div style={{ background: t.bgPale, borderRadius: 14, padding: 24, maxWidth: 480, margin: "0 auto" }}>
-            <p style={{ fontSize: 12.5 * fs, fontStyle: "italic", color: t.textMed, lineHeight: 1.8, marginBottom: 12 }}>
-              « S'il existait une réponse que je pouvais te donner sur le fonctionnement de l'univers —
+
+          {/* JANET GIF + QUOTE — THE GOOD PLACE */}
+          <div style={{ background: t.footerQuoteBg, borderRadius: 20, padding: "28px 28px 32px", maxWidth: 480, margin: "0 auto", position: "relative", overflow: "hidden", border: `1px solid ${t.border}` }}>
+            <div style={{ textAlign: "center", marginBottom: 16 }}>
+              <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExY2hudnlhM2Q5Y3kxdWtiY2Y3YjllOGdrbWJrN201N2ZvdG5yaHY4ZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kvmGozJIFULg91pxsv/giphy.gif" alt="Janet — The Good Place" style={{ width: 120, height: 120, borderRadius: 16, objectFit: "cover", border: `2px solid ${t.border}` }} />
+            </div>
+            <div style={{ position: "absolute", top: 16, left: 24, fontSize: 48, color: `${t.green}18`, fontFamily: "Georgia, serif", lineHeight: 1, pointerEvents: "none" }}>{"\u201C"}</div>
+            <p style={{ fontSize: 13 * fs, fontStyle: "italic", color: t.textMed, lineHeight: 1.85, marginBottom: 16, position: "relative", zIndex: 1 }}>
+              S'il existait une réponse que je pouvais te donner sur le fonctionnement de l'univers —
               ce ne serait pas spécial. Ce serait juste une machine qui accomplit son dessein cosmique.
               Ce serait juste un gros mixer débile. Mais puisque rien ne semble avoir de sens —
-              quand tu trouves quelque chose ou quelqu'un qui en a, c'est l'euphorie. »
+              quand tu trouves quelque chose ou quelqu'un qui en a, c'est l'euphorie.
             </p>
-            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark }}>— Janet, The Good Place</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+              <div style={{ width: 28, height: 2, background: `${t.green}40`, borderRadius: 1 }} />
+              <p style={{ fontSize: 11.5 * fs, fontWeight: 700, color: t.greenDark, fontFamily: "'Poppins', sans-serif" }}>Janet, The Good Place</p>
+              <div style={{ width: 28, height: 2, background: `${t.green}40`, borderRadius: 1 }} />
+            </div>
           </div>
-          <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 24, lineHeight: 1.5 }}>
+
+          <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 28, lineHeight: 1.6 }}>
             1'30 pour comprendre — série de vulgarisation philo-psycho-sociologique<br/>Tous les outils sont gratuits et le resteront.
           </p>
         </div>
