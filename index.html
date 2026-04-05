@@ -193,7 +193,138 @@ const EP_COLORS = {
   1: { main: "#F2A93B", dark: "#d4912a", deep: "#b87a1f", pale: "#fdf3e2", paleDark: "#3a2e1a", gradient: "linear-gradient(135deg, #F2A93B, #d4912a)" },
   2: { main: "#4AADDE", dark: "#3590be", deep: "#2678a0", pale: "#e4f4fc", paleDark: "#1a2e3a", gradient: "linear-gradient(135deg, #4AADDE, #2678a0)" },
   3: { main: "#9B6DD7", dark: "#7d52b5", deep: "#633e96", pale: "#f3edfc", paleDark: "#2a1e3a", gradient: "linear-gradient(135deg, #9B6DD7, #633e96)" },
+  4: { main: "#E85D4A", dark: "#c94a3a", deep: "#a83d2f", pale: "#fdeeed", paleDark: "#3a1e1a", gradient: "linear-gradient(135deg, #E85D4A, #a83d2f)" },
 };
+
+// Photos pour le quiz émotions — style Lie to Me (Fox, 2009-2011)
+// Source : Science of People (Vanessa Van Edwards) — référence Ekman en vulgarisation
+// Images composites de 3 sujets par émotion — crop via CSS pour isoler un visage
+// Genuine = expression Ekman authentique, Fake = expression sociale/simulée du même sujet
+// Composites Science of People / Vanessa Van Edwards (ref Ekman)
+// 3 visages par image (vertical). object-position crop chaque visage.
+// Happiness = grille 2x3 (gauche=Duchenne, droite=social)
+const FACE_PHOTOS = {
+  joie: {
+    genuine: "https://miro.medium.com/v2/0*ccEOuglP_tqXANYW.png",
+    fake: "https://miro.medium.com/v2/0*ccEOuglP_tqXANYW.png",
+    genuinePos: "0% 0%", fakePos: "100% 0%",
+  },
+  tristesse: {
+    genuine: "https://miro.medium.com/v2/0*ZIL9kMQ5B50KKPt-.png",
+    fake: "https://miro.medium.com/v2/0*ZIL9kMQ5B50KKPt-.png",
+    genuinePos: "50% 0%", fakePos: "50% 50%",
+  },
+  colere: {
+    genuine: "https://miro.medium.com/v2/0*wSS6wdp0uQXeSWjv.png",
+    fake: "https://miro.medium.com/v2/0*wSS6wdp0uQXeSWjv.png",
+    genuinePos: "50% 0%", fakePos: "50% 100%",
+  },
+  peur: {
+    genuine: "https://miro.medium.com/v2/0*hFDyP9AuR9_2TdFx.png",
+    fake: "https://miro.medium.com/v2/0*hFDyP9AuR9_2TdFx.png",
+    genuinePos: "50% 50%", fakePos: "50% 0%",
+  },
+  degout: {
+    genuine: "https://miro.medium.com/v2/0*dKK7hFEwjH1NIiAo.png",
+    fake: "https://miro.medium.com/v2/0*dKK7hFEwjH1NIiAo.png",
+    genuinePos: "50% 0%", fakePos: "50% 100%",
+  },
+  surprise: {
+    genuine: "https://miro.medium.com/v2/0*oEddHamXQwAc2vgm.png",
+    fake: "https://miro.medium.com/v2/0*oEddHamXQwAc2vgm.png",
+    genuinePos: "50% 50%", fakePos: "50% 100%",
+  },
+};
+
+// Action Units FACS par émotion (Ekman / Lie to Me)
+const FACS_AU = { joie: "AU6+12", tristesse: "AU1+4+15", colere: "AU4+5+7+23", peur: "AU1+2+4+20", degout: "AU9+15+16", surprise: "AU1+2+5B+27" };
+
+function FacePhoto({ emotion, genuine, size = 120, reveal = false }) {
+  const data = FACE_PHOTOS[emotion];
+  const src = genuine ? data?.genuine : data?.fake;
+  const pos = genuine ? (data?.genuinePos || "center") : (data?.fakePos || "center");
+  const brkColor = reveal ? "rgba(0,255,150,0.55)" : "rgba(0,255,150,0.3)";
+  return (
+    <div style={{ position: "relative", width: size, height: size, borderRadius: 16, overflow: "hidden", background: "#0a0a0a" }}>
+      <img
+        src={src}
+        alt={`${emotion} — ${genuine ? "authentique" : "simulée"}`}
+        style={{ width: "100%", height: "300%", objectFit: "cover", objectPosition: pos, display: "block", filter: "grayscale(1) contrast(1.35) brightness(1.05)" }}
+        loading="lazy"
+      />
+      {/* Lie to Me — green analysis overlay */}
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,220,130,0.08) 0%, transparent 35%, transparent 65%, rgba(0,220,130,0.06) 100%)", pointerEvents: "none" }} />
+      {/* Scanlines */}
+      <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,255,150,0.025) 3px, rgba(0,255,150,0.025) 4px)", pointerEvents: "none" }} />
+      {/* Corner brackets — forensic targeting */}
+      <div style={{ position: "absolute", top: 5, left: 5, width: 14, height: 14, borderTop: `1.5px solid ${brkColor}`, borderLeft: `1.5px solid ${brkColor}`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: 5, right: 5, width: 14, height: 14, borderTop: `1.5px solid ${brkColor}`, borderRight: `1.5px solid ${brkColor}`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 5, left: 5, width: 14, height: 14, borderBottom: `1.5px solid ${brkColor}`, borderLeft: `1.5px solid ${brkColor}`, pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 5, right: 5, width: 14, height: 14, borderBottom: `1.5px solid ${brkColor}`, borderRight: `1.5px solid ${brkColor}`, pointerEvents: "none" }} />
+      {/* FACS labels — only shown after reveal */}
+      {reveal && (
+        <>
+          <div style={{ position: "absolute", bottom: 6, left: 6, background: "rgba(0,0,0,0.72)", color: "#00ff96", fontSize: Math.max(7, size * 0.065), fontFamily: "'Courier New', monospace", padding: "1px 5px", borderRadius: 3, fontWeight: 700, letterSpacing: "0.06em", lineHeight: 1.4 }}>
+            {genuine ? FACS_AU[emotion] || "FACS" : "SIM"}
+          </div>
+          <div style={{ position: "absolute", top: 6, right: 6, background: "rgba(0,0,0,0.6)", color: genuine ? "#00ff96" : "#ff6b6b", fontSize: Math.max(6, size * 0.055), fontFamily: "'Courier New', monospace", padding: "1px 4px", borderRadius: 3, fontWeight: 700 }}>
+            {genuine ? "VRAI" : "FAUX"}
+          </div>
+        </>
+      )}
+      {/* Scanning dot animation during quiz (not revealed) */}
+      {!reveal && (
+        <div style={{ position: "absolute", bottom: 6, left: 6, display: "flex", gap: 3, alignItems: "center" }}>
+          <div style={{ width: 5, height: 5, borderRadius: "50%", background: "#00ff96", animation: "pulse 1.5s ease infinite" }} />
+          <span style={{ fontSize: Math.max(6, size * 0.055), fontFamily: "'Courier New', monospace", color: "#00ff96", fontWeight: 700, opacity: 0.7 }}>SCAN</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const quizData = [
+  { emotion: "joie", label: "Joie", genuineLabel: "Sourire de Duchenne", fakeLabel: "Sourire social", genuineIsLeft: true,
+    explanation: "Le sourire de Duchenne active le muscle orbiculaire de l'oeil — les pattes d'oie apparaissent, les yeux se plissent. Le sourire social ne mobilise que le zygomatique (la bouche). C'est la différence entre un sourire qu'on donne et un sourire qu'on joue. Duchenne de Boulogne l'a identifié en 1862." },
+  { emotion: "tristesse", label: "Tristesse", genuineLabel: "Tristesse réelle", fakeLabel: "Tristesse jouée", genuineIsLeft: false,
+    explanation: "La vraie tristesse active le muscle corrugateur — les sourcils internes remontent, créant un pli caractéristique sur le front. C'est un mouvement quasi impossible à reproduire volontairement. La tristesse simulée passe par la bouche (moue), mais les sourcils restent plats." },
+  { emotion: "colere", label: "Colère", genuineLabel: "Colère réelle", fakeLabel: "Colère simulée", genuineIsLeft: true,
+    explanation: "La colère réelle combine trois signaux simultanés : sourcils abaissés et rapprochés (muscle corrugateur), paupières tendues, et lèvres serrées. La colère jouée n'arrive souvent pas à synchroniser les trois — les sourcils froncent mais les yeux trahissent." },
+  { emotion: "peur", label: "Peur", genuineLabel: "Peur réelle", fakeLabel: "Peur simulée", genuineIsLeft: false,
+    explanation: "La peur ouvre grand les yeux (le blanc devient visible au-dessus de l'iris) et soulève les sourcils d'un coup. C'est un réflexe de survie — élargir le champ de vision. La peur jouée exagère la bouche mais oublie les yeux. Ekman appelle ça une micro-expression incomplète." },
+  { emotion: "degout", label: "Dégoût", genuineLabel: "Dégoût réel", fakeLabel: "Dégoût simulé", genuineIsLeft: true,
+    explanation: "Le dégoût plisse le nez (muscle nasalis) et relève la lèvre supérieure d'un seul côté — souvent le gauche. C'est un vestige évolutif : on ferme les voies nasales pour se protéger d'un aliment toxique. Le dégoût simulé mime la langue sortie mais oublie le plissement nasal." },
+  { emotion: "surprise", label: "Surprise", genuineLabel: "Surprise réelle", fakeLabel: "Surprise jouée", genuineIsLeft: false,
+    explanation: "La surprise dure moins d'une seconde. Si elle reste figée plus longtemps, elle est jouée. Les vrais yeux de surprise montrent le blanc autour de toute l'iris. La surprise simulée garde souvent les pupilles normales et ne mobilise que les sourcils et la bouche — sans les yeux." },
+];
+
+const ep4Sources = [
+  { label: "Paul Ekman", detail: "Emotions Revealed, 2003 — classification des 6 émotions primaires et micro-expressions" },
+  { label: "Albert Mehrabian", detail: "Silent Messages, 1971 — la règle 7-38-55 : mots, ton, langage corporel" },
+  { label: "Duchenne de Boulogne", detail: "Mécanisme de la physionomie humaine, 1862 — sourire vrai vs sourire social" },
+  { label: "Judy Smith", detail: "Good Self, Bad Self, 2012 — inspiration d'Olivia Pope dans Scandal, cliente Monica Lewinsky" },
+  { label: "Monica Lewinsky", detail: "Reconstruction publique gérée par Judy Smith — TED Talk 2015 : The Price of Shame" },
+  { label: "Raphaël Arnault — Blast", detail: "Interview avril 2026 — 1h13, quasi-direct, sans découpe" },
+  { label: "Blast — interview complète", detail: "https://youtu.be/ljwRws2SOJY", isLink: true },
+  { label: "Lie to Me", detail: "Série Fox (2009-2011) — basée sur les travaux de Paul Ekman, consultant scientifique de la série" },
+];
+
+const casEcoles = [
+  { name: "Monica Lewinsky", context: "Gérée par Judy Smith — reconstruction publique sur plusieurs années",
+    worked: "Judy Smith a appliqué un protocole précis : silence médiatique d'abord, puis prise de parole maîtrisée, en commençant par des formats longs et contrôlés. Lewinsky a repris le récit à son compte avec son TED Talk 2015 (The Price of Shame, 14M de vues). Elle a transformé l'humiliation publique en expertise sur le cyberharcèlement. Le timing était chirurgical — assez de recul pour être crédible, assez tôt pour rester pertinente." },
+  { name: "Raphaël Arnault — Blast, avril 2026", context: "Interview 1h13, quasi-direct, fond rouge, chemise rayée bleu-blanc",
+    worked: "Format long sans découpe — l'original, pas le clip sorti de contexte. Voix grave, posée, légèrement cassée. Micros parfaits. Le langage corporel est visible : plan américain élargi, mains, respiration. Quand un geste accompagne une parole, le message s'ancre. La tenue (rayures bleu-blanc, fond rouge) crée une association visuelle immédiate sans la nommer. C'est de l'entretien de reconstruction — école Judy Smith." },
+];
+
+const lexique = [
+  { term: "Plan américain", def: "Cadrage qui coupe le sujet à mi-cuisse. Permet de voir les mains, la posture et les gestes — là où passe 55% du message selon Mehrabian." },
+  { term: "Plan serré", def: "Cadrage visage seul. Ne montre que les micro-expressions. Idéal pour cacher le langage corporel — ou pour le surexposer." },
+  { term: "Plan moyen / Plan large", def: "Plan moyen : cadrage à la taille. Plan large : corps entier + environnement. Plus le cadre s'élargit, plus le contexte influence la lecture." },
+  { term: "Conditions du direct", def: "Émission sans montage ni découpe. Chaque hésitation, chaque silence est visible. Le direct ne pardonne pas — c'est pour ça qu'il révèle." },
+  { term: "Spin doctor", def: "Conseiller en communication de crise. Gère l'image publique, le récit médiatique, le timing des prises de parole. Judy Smith en est l'archétype." },
+  { term: "Colorimétrie", def: "Choix des couleurs dans le cadre — vêtements, fond, lumière. Les couleurs déclenchent des associations inconscientes. Le bleu inspire confiance, le rouge alerte." },
+  { term: "Interview de reconstruction", def: "Format long, maîtrisé, où le sujet reprend le contrôle de son propre récit. L'inverse du clip de 30 secondes sorti de contexte." },
+];
 
 function getTheme(mode, highContrast) {
   if (mode === "dark") {
@@ -244,13 +375,14 @@ function getTheme(mode, highContrast) {
 }
 
 function Toolbox() {
-  const [openEp, setOpenEp] = useState(3);
+  const [openEp, setOpenEp] = useState(4);
   const [activeQ, setActiveQ] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
   const [entered, setEntered] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const [showEp3Sources, setShowEp3Sources] = useState(false);
+  const [showEp4Sources, setShowEp4Sources] = useState(false);
   const [showInspir, setShowInspir] = useState(false);
   const [showAquarium, setShowAquarium] = useState(false);
   const [copiedInspir, setCopiedInspir] = useState(false);
@@ -259,11 +391,19 @@ function Toolbox() {
   const [highContrast, setHighContrast] = useState(false);
   const [largeText, setLargeText] = useState(false);
   const [showA11y, setShowA11y] = useState(false);
+  // EP4 states
+  const [hookAnswer, setHookAnswer] = useState(null); // null = not answered, "left" or "right"
+  const [ep4Unlocked, setEp4Unlocked] = useState(false);
+  const [quizStep, setQuizStep] = useState(0); // 0-5 = questions, 6 = results
+  const [quizAnswers, setQuizAnswers] = useState([]);
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
 
   const t = getTheme(mode, highContrast);
   const fs = largeText ? 1.25 : 1;
 
   useEffect(() => { setTimeout(() => setEntered(true), 150); }, []);
+  useEffect(() => { const timer = setTimeout(() => setShowSplash(false), 2800); return () => clearTimeout(timer); }, []);
 
   const copyPrompt = async () => { try { await navigator.clipboard.writeText(PROMPT_TEXT); setCopied(true); setTimeout(() => setCopied(false), 2500); } catch { setCopied(false); } };
   const copyInspirPrompt = async () => { try { await navigator.clipboard.writeText(INSPIR_PROMPT); setCopiedInspir(true); setTimeout(() => setCopiedInspir(false), 2500); } catch { setCopiedInspir(false); } };
@@ -273,24 +413,72 @@ function Toolbox() {
   const epContentRef1 = useRef(null);
   const epContentRef2 = useRef(null);
   const epContentRef3 = useRef(null);
+  const epContentRef4 = useRef(null);
   const [epH1, setEpH1] = useState(0);
   const [epH2, setEpH2] = useState(0);
   const [epH3, setEpH3] = useState(0);
+  const [epH4, setEpH4] = useState(0);
 
   const updateHeights = useCallback(() => {
     requestAnimationFrame(() => {
       if (epContentRef1.current) setEpH1(openEp === 1 ? epContentRef1.current.scrollHeight : 0);
       if (epContentRef2.current) setEpH2(openEp === 2 ? epContentRef2.current.scrollHeight : 0);
       if (epContentRef3.current) setEpH3(openEp === 3 ? epContentRef3.current.scrollHeight : 0);
+      if (epContentRef4.current) setEpH4(openEp === 4 ? epContentRef4.current.scrollHeight : 0);
     });
   }, [openEp]);
 
-  useEffect(() => { updateHeights(); }, [openEp, showPrompt, activeQ, showSources, showEp3Sources, showInspir, showAquarium, updateHeights]);
+  const handleHook = (side) => {
+    const q = quizData[0];
+    const correct = (side === "left" && q.genuineIsLeft) || (side === "right" && !q.genuineIsLeft);
+    setHookAnswer(correct ? "correct" : "wrong");
+    setTimeout(() => setEp4Unlocked(true), 1200);
+  };
+
+  const handleQuizAnswer = (side) => {
+    const q = quizData[quizStep];
+    const correct = (side === "left" && q.genuineIsLeft) || (side === "right" && !q.genuineIsLeft);
+    setQuizAnswers([...quizAnswers, correct]);
+    setTimeout(() => setQuizStep(quizStep + 1), 600);
+  };
+
+  const quizScore = quizAnswers.filter(Boolean).length;
+
+  const shareScore = () => {
+    const text = `J'ai obtenu ${quizScore}/6 au quiz des émotions primaires (Paul Ekman) — Boîte à outils, 1'30 pour comprendre. Et toi ?`;
+    if (navigator.share) { navigator.share({ text }); } else { navigator.clipboard.writeText(text); }
+  };
+
+  useEffect(() => { updateHeights(); }, [openEp, showPrompt, activeQ, showSources, showEp3Sources, showEp4Sources, showInspir, showAquarium, ep4Unlocked, quizStep, quizStarted, updateHeights]);
 
   return (
     <div style={{ minHeight: "100vh", background: t.bg, fontFamily: "'Nunito', sans-serif", color: t.textDark, transition: "all 0.4s ease" }}>
+      {/* SPLASH SCREEN — THE GOOD PLACE */}
+      {showSplash && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "linear-gradient(170deg, #3a8a34 0%, #2d7a4a 30%, #4AADDE 60%, #9B6DD7 100%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", animation: "splashFade 2.8s ease forwards" }}>
+          {/* Floating pastel circles — The Good Place background */}
+          <div style={{ position: "absolute", top: "10%", left: "15%", width: 180, height: 180, borderRadius: "50%", background: "rgba(242,169,59,0.15)", filter: "blur(40px)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: "20%", right: "10%", width: 220, height: 220, borderRadius: "50%", background: "rgba(155,109,215,0.15)", filter: "blur(50px)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: "40%", right: "25%", width: 140, height: 140, borderRadius: "50%", background: "rgba(74,173,222,0.12)", filter: "blur(35px)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: "10%", left: "20%", width: 160, height: 160, borderRadius: "50%", background: "rgba(232,93,74,0.1)", filter: "blur(45px)", pointerEvents: "none" }} />
+          {/* Content */}
+          <p style={{ fontSize: "clamp(11px, 3vw, 13px)", fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase", color: "rgba(255,255,255,0.85)", marginBottom: 18, fontFamily: "'Poppins', sans-serif", animation: "splashSub 2.8s ease forwards", opacity: 0, textShadow: "0 2px 12px rgba(0,0,0,0.15)" }}>1'30 pour comprendre</p>
+          <h1 style={{ fontSize: "clamp(44px, 13vw, 76px)", fontWeight: 900, color: "#fff", fontFamily: "'Poppins', sans-serif", letterSpacing: "-0.02em", lineHeight: 1, animation: "splashTitle 2.8s ease forwards", opacity: 0, textShadow: "0 4px 20px rgba(0,0,0,0.12)" }}>Boîte à outils.</h1>
+          <div style={{ display: "flex", gap: 8, marginTop: 22, animation: "splashSub 2.8s ease 0.15s forwards", opacity: 0 }}>
+            {[EP_COLORS[1].main, EP_COLORS[2].main, EP_COLORS[3].main, EP_COLORS[4].main].map((c, i) => (
+              <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: c, boxShadow: `0 2px 8px ${c}60` }} />
+            ))}
+          </div>
+          <p style={{ fontSize: "clamp(12px, 3vw, 14px)", fontWeight: 600, color: "rgba(255,255,255,0.65)", marginTop: 16, fontFamily: "'Poppins', sans-serif", animation: "splashSub 2.8s ease 0.25s forwards", opacity: 0 }}>par Mal Aimé</p>
+        </div>
+      )}
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        @keyframes splashFade { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; pointer-events: none; } }
+        @keyframes splashTitle { 0% { opacity: 0; transform: scale(0.8) translateY(20px); } 30% { opacity: 1; transform: scale(1) translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes splashSub { 0%, 20% { opacity: 0; transform: translateY(10px); } 45% { opacity: 1; transform: translateY(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
+        @keyframes scanLine { 0% { top: -2px; } 100% { top: 100%; } }
         .q-card { cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
         .q-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(92,184,92,0.12) !important; }
         .btn { cursor: pointer; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: none; font-family: inherit; }
@@ -306,6 +494,8 @@ function Toolbox() {
         .ep-card:hover { box-shadow: 0 6px 28px rgba(0,0,0,0.06); }
         .source-dot { transition: all 0.2s ease; }
         .source-row:hover .source-dot { transform: scale(1.5); }
+        .source-row:hover { background: rgba(92,184,92,0.04); border-radius: 6px; }
+        .ref-card:hover { background: rgba(92,184,92,0.03) !important; }
         @media (max-width: 600px) { .q-grid { grid-template-columns: 1fr !important; } }
       `}</style>
 
@@ -361,15 +551,15 @@ function Toolbox() {
                 </div>
                 <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>Références citées dans l'épisode</p>
                 {ep1References.map((ref, i) => (
-                  <div key={i} className="ref-card" style={{ display: "flex", gap: 14, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, marginBottom: 8, alignItems: "flex-start" }}>
+                  <a key={i} href={`https://www.google.com/search?q=${encodeURIComponent(ref.title + " " + ref.author + " " + ref.year)}`} target="_blank" rel="noopener noreferrer" className="ref-card" style={{ display: "flex", gap: 14, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, marginBottom: 8, alignItems: "flex-start", textDecoration: "none", cursor: "pointer" }}>
                     <div style={{ width: 44, height: 44, borderRadius: 12, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, flexShrink: 0 }}>{ref.emoji}</div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 13 * fs, fontWeight: 700, color: t.textDark, marginBottom: 2 }}>{ref.title}</div>
+                      <div style={{ fontSize: 13 * fs, fontWeight: 700, color: t.textDark, marginBottom: 2 }}>{ref.title} <span style={{ fontSize: 10 * fs, color: EP_COLORS[1].main }}>{"\u2197"}</span></div>
                       <div style={{ fontSize: 11 * fs, color: t.textLight, marginBottom: 4 }}>{ref.author} — {ref.year} · {ref.type}</div>
                       <div style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6 }}>{ref.desc}</div>
                       {ref.available && (<div style={{ display: "inline-block", marginTop: 6, padding: "3px 10px", borderRadius: 100, background: t.bgPale, fontSize: 10 * fs, fontWeight: 700, color: t.greenDark }}>Disponible sur {ref.available}</div>)}
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
@@ -426,10 +616,10 @@ function Toolbox() {
                 {showSources && (
                   <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
                     {ep2Sources.map((s, i) => (
-                      <div key={i} className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
+                      <a key={i} href={`https://www.google.com/search?q=${encodeURIComponent(s.label + " " + s.detail)}`} target="_blank" rel="noopener noreferrer" className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline", textDecoration: "none", cursor: "pointer" }}>
                         <div className="source-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
-                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span></div>
-                      </div>
+                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span><span style={{ fontSize: 10 * fs, color: EP_COLORS[2].main, marginLeft: 6 }}>{"\u2197"}</span></div>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -527,15 +717,210 @@ function Toolbox() {
                 {showEp3Sources && (
                   <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
                     {ep3Sources.map((s, i) => (
-                      <div key={i} className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline" }}>
+                      <a key={i} href={`https://www.google.com/search?q=${encodeURIComponent(s.label + " " + s.detail)}`} target="_blank" rel="noopener noreferrer" className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline", textDecoration: "none", cursor: "pointer" }}>
                         <div className="source-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: t.green, flexShrink: 0, marginTop: 6 }} />
-                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span></div>
-                      </div>
+                        <div><span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span><span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span><span style={{ fontSize: 10 * fs, color: EP_COLORS[3].main, marginLeft: 6 }}>{"\u2197"}</span></div>
+                      </a>
                     ))}
                   </div>
                 )}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* EPISODE 4 — COMMUNICATION NON VERBALE */}
+        <div className="ep-card" style={{ background: t.bgCard, borderRadius: 18, border: `1.5px solid ${openEp === 4 ? EP_COLORS[4].main : t.border}`, overflow: "hidden", transition: "all 0.35s ease", boxShadow: openEp === 4 ? `0 4px 28px ${EP_COLORS[4].main}20` : "0 2px 8px rgba(0,0,0,0.03)", marginBottom: 14 }}>
+          <button className="ep-btn" onClick={() => setOpenEp(openEp === 4 ? null : 4)}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: openEp === 4 ? EP_COLORS[4].gradient : t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: openEp === 4 ? "#fff" : EP_COLORS[4].main, transition: "all 0.3s ease", flexShrink: 0, fontFamily: "'Poppins', sans-serif" }}>4</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Communication non verbale</div></div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, color: EP_COLORS[4].main, transform: openEp === 4 ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)" }}>{"\u25BE"}</div>
+          </button>
+          <div style={{ height: epH4, overflow: "hidden", transition: "height 0.4s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+            <div ref={epContentRef4} style={{ padding: "0 22px 22px" }}>
+              <div style={{ borderTop: `1px solid ${t.border}`, paddingTop: 18 }}>
+
+                <p style={{ fontSize: 14 * fs, color: t.textMed, lineHeight: 1.75, marginBottom: 20 }}>On ne communique pas qu'avec les mots. Mehrabian a montré que 55% du message passe par le corps, 38% par le ton, et seulement 7% par les mots. L'épisode 4 décrypte comment ça fonctionne — et comment on peut le lire.</p>
+
+                {/* BLOC 1 — QUIZ 6 ÉMOTIONS (bouton d'accès) */}
+                <div style={{ background: t.isDark ? EP_COLORS[4].paleDark : EP_COLORS[4].pale, borderRadius: 16, padding: 22, marginBottom: 20, borderLeft: `3px solid ${EP_COLORS[4].main}` }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                    <span style={{ fontSize: 20 }}>{"\u{1F9E0}"}</span>
+                    <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Quiz — 6 émotions primaires</h3>
+                  </div>
+                  <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 16 }}>Paul Ekman a identifié 6 émotions universelles, reconnaissables sur tous les visages humains. Pour chaque émotion, une expression est authentique, l'autre est jouée. À toi de voir la différence.</p>
+
+                  {!ep4Unlocked ? (
+                    <button className="btn" onClick={() => setEp4Unlocked(true)} style={{ background: EP_COLORS[4].gradient, color: "#fff", padding: "14px 24px", borderRadius: 12, fontSize: 14 * fs, fontWeight: 700, width: "100%" }}>Accéder au quiz {"\u2192"}</button>
+                  ) : !quizStarted ? (
+                    <div>
+                      {/* HOOK — Lequel est vrai ? */}
+                      <div style={{ textAlign: "center", padding: "10px 0 16px", marginBottom: 16, borderBottom: `1px solid ${t.border}` }}>
+                        <p style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textDark, marginBottom: 6, fontFamily: "'Poppins', sans-serif" }}>Lequel est vrai ?</p>
+                        <p style={{ fontSize: 12 * fs, color: t.textMed, marginBottom: 16, lineHeight: 1.6 }}>Deux sourires. Un seul est sincère. Clique sur celui que tu penses vrai.</p>
+                        <div style={{ display: "flex", justifyContent: "center", gap: 24, marginBottom: 12 }}>
+                          <div onClick={() => !hookAnswer && handleHook("left")} style={{ cursor: hookAnswer ? "default" : "pointer", padding: 16, borderRadius: 16, border: `2px solid ${hookAnswer === "correct" && quizData[0].genuineIsLeft ? EP_COLORS[4].main : hookAnswer === "wrong" && !quizData[0].genuineIsLeft ? EP_COLORS[4].main : t.border}`, background: hookAnswer && quizData[0].genuineIsLeft ? `${EP_COLORS[4].main}12` : t.bgCard, transition: "all 0.3s ease" }}>
+                            <FacePhoto emotion="joie" genuine={quizData[0].genuineIsLeft} size={108} reveal={!!hookAnswer} />
+                            <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 8, fontWeight: 600 }}>A</p>
+                          </div>
+                          <div onClick={() => !hookAnswer && handleHook("right")} style={{ cursor: hookAnswer ? "default" : "pointer", padding: 16, borderRadius: 16, border: `2px solid ${hookAnswer === "correct" && !quizData[0].genuineIsLeft ? EP_COLORS[4].main : hookAnswer === "wrong" && quizData[0].genuineIsLeft ? EP_COLORS[4].main : t.border}`, background: hookAnswer && !quizData[0].genuineIsLeft ? `${EP_COLORS[4].main}12` : t.bgCard, transition: "all 0.3s ease" }}>
+                            <FacePhoto emotion="joie" genuine={!quizData[0].genuineIsLeft} size={108} reveal={!!hookAnswer} />
+                            <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 8, fontWeight: 600 }}>B</p>
+                          </div>
+                        </div>
+                        {hookAnswer && (
+                          <div style={{ animation: "fadeIn 0.4s ease both" }}>
+                            <p style={{ fontSize: 14 * fs, fontWeight: 700, color: hookAnswer === "correct" ? t.green : EP_COLORS[4].main, marginBottom: 6 }}>
+                              {hookAnswer === "correct" ? "Bien vu." : "Raté."}
+                            </p>
+                            <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6, marginBottom: 12 }}>Le vrai sourire plisse les yeux — muscle orbiculaire. Le faux ne bouge que la bouche.</p>
+                          </div>
+                        )}
+                      </div>
+                      <button className="btn" onClick={() => setQuizStarted(true)} style={{ background: EP_COLORS[4].gradient, color: "#fff", padding: "12px 24px", borderRadius: 12, fontSize: 13 * fs, fontWeight: 700, width: "100%" }}>Commencer le quiz complet (6 émotions) {"\u2192"}</button>
+                    </div>
+                  ) : quizStep < 6 ? (
+                    <div style={{ textAlign: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                        <p style={{ fontSize: 11 * fs, color: t.textLight, fontWeight: 600 }}>{quizStep + 1}/6</p>
+                        <p style={{ fontSize: 14 * fs, fontWeight: 800, color: EP_COLORS[4].main, fontFamily: "'Poppins', sans-serif" }}>{quizData[quizStep].label}</p>
+                        <p style={{ fontSize: 11 * fs, color: t.textLight, fontWeight: 600 }}>{quizAnswers.filter(Boolean).length} {"\u2713"}</p>
+                      </div>
+                      <p style={{ fontSize: 12 * fs, color: t.textMed, marginBottom: 16 }}>Laquelle est l'expression authentique ?</p>
+                      <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 8 }}>
+                        <div onClick={() => quizAnswers.length === quizStep && handleQuizAnswer("left")} style={{ cursor: quizAnswers.length === quizStep ? "pointer" : "default", padding: 16, borderRadius: 16, border: `2px solid ${t.border}`, background: t.bgCard, transition: "all 0.2s ease" }}>
+                          <FacePhoto emotion={quizData[quizStep].emotion} genuine={quizData[quizStep].genuineIsLeft} size={108} />
+                          <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 8, fontWeight: 600 }}>A</p>
+                        </div>
+                        <div onClick={() => quizAnswers.length === quizStep && handleQuizAnswer("right")} style={{ cursor: quizAnswers.length === quizStep ? "pointer" : "default", padding: 16, borderRadius: 16, border: `2px solid ${t.border}`, background: t.bgCard, transition: "all 0.2s ease" }}>
+                          <FacePhoto emotion={quizData[quizStep].emotion} genuine={!quizData[quizStep].genuineIsLeft} size={108} />
+                          <p style={{ fontSize: 10 * fs, color: t.textLight, marginTop: 8, fontWeight: 600 }}>B</p>
+                        </div>
+                      </div>
+                      {quizAnswers.length > quizStep - 1 && quizStep > 0 && (
+                        <p style={{ fontSize: 11 * fs, color: quizAnswers[quizStep - 1] ? t.green : EP_COLORS[4].main, fontWeight: 600, animation: "fadeIn 0.3s ease both" }}>
+                          {quizAnswers[quizStep - 1] ? "\u2713 Correct" : "\u2717 Raté"}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div style={{ animation: "fadeIn 0.5s ease both" }}>
+                      <div style={{ textAlign: "center", marginBottom: 20 }}>
+                        <p style={{ fontSize: 28 * fs, fontWeight: 900, color: EP_COLORS[4].main, fontFamily: "'Poppins', sans-serif" }}>{quizScore}/6</p>
+                        <p style={{ fontSize: 13 * fs, color: t.textMed, marginTop: 4 }}>
+                          {quizScore <= 2 ? "Le cerveau se fait piéger. C'est normal — c'est exactement pour ça qu'Ekman a passé 40 ans à étudier ces muscles." :
+                           quizScore <= 4 ? "Pas mal. Tu repères certains signaux — mais les micro-expressions les plus subtiles t'échappent encore." :
+                           "Impressionnant. Tu lis les visages mieux que la moyenne. Ekman serait content."}
+                        </p>
+                        <button className="btn" onClick={shareScore} style={{ background: EP_COLORS[4].gradient, color: "#fff", padding: "10px 20px", borderRadius: 10, fontSize: 12 * fs, fontWeight: 700, marginTop: 14 }}>Partager mon score</button>
+                      </div>
+                      <p style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 12 }}>Explications par émotion</p>
+                      {quizData.map((q, i) => (
+                        <div key={i} style={{ display: "flex", gap: 12, padding: 14, background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, marginBottom: 8, alignItems: "flex-start" }}>
+                          <div style={{ width: 28, height: 28, borderRadius: 8, background: quizAnswers[i] ? `${t.green}18` : `${EP_COLORS[4].main}18`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 800, color: quizAnswers[i] ? t.green : EP_COLORS[4].main, flexShrink: 0 }}>{quizAnswers[i] ? "\u2713" : "\u2717"}</div>
+                          <div>
+                            <p style={{ fontSize: 13 * fs, fontWeight: 700, color: t.textDark, marginBottom: 4 }}>{q.label}</p>
+                            <p style={{ fontSize: 11.5 * fs, color: t.textMed, lineHeight: 1.65 }}>{q.explanation}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                    {/* BLOC 2 — EXERCICE POSTURAL */}
+                    <div style={{ background: t.bgPale, borderRadius: 16, padding: 22, marginBottom: 20, borderLeft: `3px solid ${EP_COLORS[4].main}` }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                        <span style={{ fontSize: 20 }}>{"\u{1F3AC}"}</span>
+                        <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Exercice postural</h3>
+                      </div>
+                      <p style={{ fontSize: 12.5 * fs, color: t.textMed, lineHeight: 1.7, marginBottom: 14 }}>On ne communique pas qu'avec les mots. Albert Mehrabian a montré que 55% du message passe par le corps, 38% par le ton, et seulement 7% par les mots. Teste-le toi-même.</p>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 12, padding: 16, marginBottom: 12 }}>
+                        <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                          <div style={{ width: 24, height: 24, borderRadius: 8, background: `${EP_COLORS[4].main}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: EP_COLORS[4].main, flexShrink: 0 }}>1</div>
+                          <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6 }}>Filme-toi en <strong>plan serré</strong> (visage seul) pendant 30 secondes. Parle d'un sujet qui te tient à coeur.</p>
+                        </div>
+                        <div style={{ display: "flex", gap: 10, marginBottom: 10, alignItems: "flex-start" }}>
+                          <div style={{ width: 24, height: 24, borderRadius: 8, background: `${EP_COLORS[4].main}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: EP_COLORS[4].main, flexShrink: 0 }}>2</div>
+                          <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6 }}>Même exercice en <strong>plan américain</strong> (corps entier visible, mains libres). Même sujet, même durée.</p>
+                        </div>
+                        <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                          <div style={{ width: 24, height: 24, borderRadius: 8, background: `${EP_COLORS[4].main}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, color: EP_COLORS[4].main, flexShrink: 0 }}>3</div>
+                          <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.6 }}>Compare les deux vidéos. Quand un geste accompagne une parole, le message <strong>s'ancre</strong>. Le cerveau ne fait pas qu'écouter — il observe.</p>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 11 * fs, color: t.textLight, lineHeight: 1.6, fontStyle: "italic" }}>Sources : Paul Ekman, Emotions Revealed (2003) — Albert Mehrabian, Silent Messages (1971)</p>
+                    </div>
+
+                    {/* BLOC 3 — CAS D'ÉCOLE */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                        <span style={{ fontSize: 20 }}>{"\u{1F393}"}</span>
+                        <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Cas d'école</h3>
+                      </div>
+                      {casEcoles.map((cas, i) => (
+                        <div key={i} style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, padding: 18, marginBottom: 10 }}>
+                          <p style={{ fontSize: 14 * fs, fontWeight: 800, color: EP_COLORS[4].dark, marginBottom: 4, fontFamily: "'Poppins', sans-serif" }}>{cas.name}</p>
+                          <p style={{ fontSize: 11 * fs, color: t.textLight, marginBottom: 12 }}>{cas.context}</p>
+                          <div style={{ background: `${t.green}08`, borderRadius: 10, padding: 12, borderLeft: `3px solid ${t.green}` }}>
+                            <p style={{ fontSize: 11 * fs, fontWeight: 700, color: t.greenDark, marginBottom: 4 }}>Analyse</p>
+                            <p style={{ fontSize: 11.5 * fs, color: t.textMed, lineHeight: 1.65 }}>{cas.worked}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* BLOC 4 — LEXIQUE */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+                        <span style={{ fontSize: 20 }}>{"\u{1F4D6}"}</span>
+                        <h3 style={{ fontSize: 16 * fs, fontWeight: 800, color: t.textDark, fontFamily: "'Poppins', sans-serif" }}>Lexique</h3>
+                      </div>
+                      <div style={{ background: t.bgCard, border: `1px solid ${t.border}`, borderRadius: 14, padding: 18 }}>
+                        {lexique.map((item, i) => (
+                          <div key={i} style={{ marginBottom: i < lexique.length - 1 ? 14 : 0, paddingBottom: i < lexique.length - 1 ? 14 : 0, borderBottom: i < lexique.length - 1 ? `1px solid ${t.border}` : "none" }}>
+                            <p style={{ fontSize: 13 * fs, fontWeight: 800, color: EP_COLORS[4].dark, marginBottom: 4, fontFamily: "'Poppins', sans-serif" }}>{item.term}</p>
+                            <p style={{ fontSize: 12 * fs, color: t.textMed, lineHeight: 1.65 }}>{item.def}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* BLOC 4 — SOURCES EP4 */}
+                    <button className="btn" onClick={() => setShowEp4Sources(!showEp4Sources)} style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", borderRadius: 12, background: t.bgMint, border: `1px solid ${t.border}`, fontSize: 13 * fs, fontWeight: 700, color: showEp4Sources ? EP_COLORS[4].deep : t.textMed }}>
+                      <span>{"\u{1F4DA}"} Aller plus loin — Sources</span>
+                      <span style={{ fontSize: 12, transform: showEp4Sources ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.3s ease" }}>{"\u25BE"}</span>
+                    </button>
+                    {showEp4Sources && (
+                      <div style={{ padding: "14px 16px", border: `1px solid ${t.border}`, borderTop: "none", borderRadius: "0 0 12px 12px", background: t.bgCard }}>
+                        {ep4Sources.map((s, i) => (
+                          <a key={i} href={s.isLink ? s.detail : `https://www.google.com/search?q=${encodeURIComponent(s.label + " " + s.detail)}`} target="_blank" rel="noopener noreferrer" className="source-row" style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "baseline", textDecoration: "none", cursor: "pointer" }}>
+                            <div className="source-dot" style={{ width: 6, height: 6, borderRadius: "50%", background: EP_COLORS[4].main, flexShrink: 0, marginTop: 6 }} />
+                            <div>
+                              <span style={{ fontSize: 12 * fs, fontWeight: 700, color: t.textDark }}>{s.label}</span>
+                              {s.isLink ? (
+                                <span> — <span style={{ fontSize: 11.5 * fs, color: EP_COLORS[4].main, textDecoration: "underline" }}>Voir la vidéo</span></span>
+                              ) : (
+                                <span style={{ fontSize: 11.5 * fs, color: t.textLight }}> — {s.detail}</span>
+                              )}
+                              <span style={{ fontSize: 10 * fs, color: EP_COLORS[4].main, marginLeft: 6 }}>{"\u2197"}</span>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* TEASER EPISODE 5 */}
+        <div style={{ opacity: 0.5, pointerEvents: "none", background: t.bgCard, borderRadius: 18, border: `1.5px solid ${t.border}`, overflow: "hidden", marginBottom: 14, position: "relative" }}>
+          <div className="ep-btn" style={{ display: "flex", alignItems: "center", gap: 14, padding: "18px 22px" }}>
+            <div style={{ width: 38, height: 38, borderRadius: 12, background: t.bgPale, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 * fs, fontWeight: 800, color: t.textLight, fontFamily: "'Poppins', sans-serif" }}>5</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 15 * fs, fontWeight: 800, color: t.textLight, fontFamily: "'Poppins', sans-serif" }}>Épisode 5</div></div>
+            <div style={{ padding: "4px 12px", borderRadius: 100, background: t.bgPale, fontSize: 10 * fs, fontWeight: 700, color: t.textLight, letterSpacing: "0.08em", textTransform: "uppercase" }}>Bientôt</div>
           </div>
         </div>
 
